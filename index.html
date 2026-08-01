@@ -2,11 +2,15 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Гаманець</title>
 
 <!-- SDK від Telegram: дає доступ до даних користувача, теми, кнопок -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
   :root {
@@ -14,36 +18,66 @@
        а якщо відкрито поза Telegram — використовуємо запасні значення */
     --bg: var(--tg-theme-bg-color, #F4F6F5);
     --bg-secondary: var(--tg-theme-secondary-bg-color, #FFFFFF);
-    --text: var(--tg-theme-text-color, #1A2E28);
+    --text: var(--tg-theme-text-color, #16241F);
     --hint: var(--tg-theme-hint-color, #7C8B85);
     --button: var(--tg-theme-button-color, #0F6E56);
     --button-text: var(--tg-theme-button-text-color, #FFFFFF);
 
     --jar: #0F6E56;
+    --jar-light: #14876a;
     --coin: #F2A623;
+    --coin-light: #F7C463;
+
+    --shadow: 0 1px 2px rgba(16, 40, 34, 0.04), 0 8px 24px rgba(16, 40, 34, 0.06);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding: 20px 16px 40px;
+    padding: max(20px, env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+    -webkit-tap-highlight-color: transparent;
   }
 
   .hero {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 24px 0 8px;
+    padding: 20px 0 8px;
+    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -40px;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(15,110,86,0.14) 0%, rgba(15,110,86,0) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .jar-wrap {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    margin-bottom: 14px;
   }
 
   .jar {
-    width: 72px;
-    height: 72px;
-    margin-bottom: 14px;
+    width: 76px;
+    height: 76px;
+    filter: drop-shadow(0 6px 14px rgba(15, 110, 86, 0.22));
+  }
+
+  .coin-float {
+    animation: bob 2.6s ease-in-out infinite;
+    transform-origin: center;
   }
 
   .avatar {
@@ -53,11 +87,13 @@
     object-fit: cover;
     margin-bottom: 12px;
     border: 2px solid var(--bg-secondary);
+    box-shadow: var(--shadow);
   }
 
   .greeting {
-    font-size: 20px;
-    font-weight: 600;
+    font-family: 'Manrope', 'Inter', sans-serif;
+    font-size: 21px;
+    font-weight: 800;
     letter-spacing: -0.01em;
   }
 
@@ -69,40 +105,66 @@
 
   .card {
     background: var(--bg-secondary);
-    border-radius: 16px;
-    padding: 18px;
+    border-radius: 18px;
+    padding: 20px;
     margin-top: 20px;
+    box-shadow: var(--shadow);
+    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
+  }
+
+  .balance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .balance-label {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--hint);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  .balance-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: rgba(15, 110, 86, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--jar);
   }
 
   .balance-value {
-    font-size: 32px;
-    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
     font-variant-numeric: tabular-nums;
-    margin-top: 4px;
+    margin-top: 6px;
+    letter-spacing: -0.02em;
   }
 
   .balance-hint {
     font-size: 13px;
     color: var(--hint);
     margin-top: 8px;
+    line-height: 1.4;
   }
 
   .roadmap {
-    margin-top: 20px;
+    margin-top: 22px;
+    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
   }
 
   .roadmap-title {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--hint);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    font-weight: 600;
     margin-bottom: 10px;
     padding-left: 2px;
   }
@@ -115,12 +177,18 @@
     border-radius: 14px;
     padding: 14px 16px;
     margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .feature-row:active {
+    transform: scale(0.98);
   }
 
   .feature-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
     background: rgba(15, 110, 86, 0.1);
     color: var(--jar);
     display: flex;
@@ -136,7 +204,7 @@
 
   .feature-name {
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .feature-status {
@@ -145,16 +213,34 @@
     margin-top: 1px;
   }
 
-  .fallback {
-    text-align: center;
-    padding: 60px 20px;
+  .feature-status.soon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
 
-  .fallback p {
-    color: var(--hint);
-    font-size: 14px;
-    margin-top: 8px;
-    line-height: 1.5;
+  .feature-status.soon::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--coin);
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero, .card, .roadmap, .coin-float {
+      animation: none !important;
+    }
   }
 </style>
 </head>
@@ -166,76 +252,81 @@
   const tg = window.Telegram ? window.Telegram.WebApp : null;
   const app = document.getElementById('app');
 
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  // Дані користувача підставляються, лише якщо Telegram реально їх передав.
+  // Якщо ні (наприклад, сторінку відкрито напряму в браузері) — застосунок
+  // все одно повністю робочий, просто з нейтральним привітанням.
+  const user = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+  const name = (user && user.first_name) || 'друже';
+  const photo = user && user.photo_url;
+
   // Проста SVG-баночка — візуальна "фішка" застосунку
   const jarSvg = `
-    <svg class="jar" viewBox="0 0 72 72" fill="none">
-      <rect x="16" y="10" width="40" height="10" rx="4" fill="var(--jar)" opacity="0.35"/>
-      <path d="M14 24 C14 20 17 18 20 18 H52 C55 18 58 20 58 24 V56 C58 61 54 65 49 65 H23 C18 65 14 61 14 56 Z"
+    <svg class="jar" viewBox="0 0 76 76" fill="none">
+      <rect x="17" y="10" width="42" height="10" rx="4" fill="var(--jar)" opacity="0.35"/>
+      <path d="M15 24 C15 20 18 18 21 18 H55 C58 18 61 20 61 24 V58 C61 63 57 67 52 67 H24 C19 67 15 63 15 58 Z"
             fill="var(--bg-secondary)" stroke="var(--jar)" stroke-width="2.5"/>
-      <circle cx="36" cy="40" r="7" fill="var(--coin)"/>
-      <circle cx="24" cy="52" r="5" fill="var(--coin)" opacity="0.6"/>
+      <g class="coin-float">
+        <circle cx="38" cy="41" r="7.5" fill="var(--coin)"/>
+        <circle cx="25" cy="53" r="5.5" fill="var(--coin-light)"/>
+      </g>
     </svg>
   `;
 
-  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    // Застосунок відкрито всередині Telegram — є дані користувача
-    tg.ready();
-    tg.expand();
+  app.innerHTML = `
+    <div class="hero">
+      ${photo ? `<img class="avatar" src="${photo}" alt="">` : `<div class="jar-wrap">${jarSvg}</div>`}
+      <div class="greeting">Привіт, ${name}!</div>
+      <div class="subtitle">Це твій гаманець</div>
+    </div>
 
-    const user = tg.initDataUnsafe.user;
-    const name = user.first_name || 'друже';
-    const photo = user.photo_url;
-
-    app.innerHTML = `
-      <div class="hero">
-        ${photo ? `<img class="avatar" src="${photo}" alt="">` : jarSvg}
-        <div class="greeting">Привіт, ${name}!</div>
-        <div class="subtitle">Це твій гаманець</div>
-      </div>
-
-      <div class="card">
+    <div class="card">
+      <div class="balance-row">
         <div class="balance-label">Загальний баланс</div>
-        <div class="balance-value">— грн</div>
-        <div class="balance-hint">Поки що тут порожньо — далі додамо можливість вписати суму</div>
+        <div class="balance-badge">₴</div>
       </div>
+      <div class="balance-value">— грн</div>
+      <div class="balance-hint">Поки що тут порожньо — далі додамо можливість вписати суму</div>
+    </div>
 
-      <div class="roadmap">
-        <div class="roadmap-title">Що буде далі</div>
+    <div class="roadmap">
+      <div class="roadmap-title">Що буде далі</div>
 
-        <div class="feature-row">
-          <div class="feature-icon">₴</div>
-          <div class="feature-text">
-            <div class="feature-name">Категорії витрат</div>
-            <div class="feature-status">скоро</div>
-          </div>
-        </div>
-
-        <div class="feature-row">
-          <div class="feature-icon">📅</div>
-          <div class="feature-text">
-            <div class="feature-name">Календар і статистика</div>
-            <div class="feature-status">скоро</div>
-          </div>
-        </div>
-
-        <div class="feature-row">
-          <div class="feature-icon">🫙</div>
-          <div class="feature-text">
-            <div class="feature-name">Баночки для накопичень</div>
-            <div class="feature-status">скоро</div>
-          </div>
+      <div class="feature-row">
+        <div class="feature-icon">₴</div>
+        <div class="feature-text">
+          <div class="feature-name">Категорії витрат</div>
+          <div class="feature-status soon">скоро</div>
         </div>
       </div>
-    `;
-  } else {
-    // Сторінку відкрито у звичайному браузері, не через Telegram
-    app.innerHTML = `
-      <div class="fallback">
-        ${jarSvg}
-        <div class="greeting">Гаманець</div>
-        <p>Ця сторінка працює лише всередині Telegram.<br>Відкрий її через кнопку в боті.</p>
+
+      <div class="feature-row">
+        <div class="feature-icon">📅</div>
+        <div class="feature-text">
+          <div class="feature-name">Календар і статистика</div>
+          <div class="feature-status soon">скоро</div>
+        </div>
       </div>
-    `;
+
+      <div class="feature-row">
+        <div class="feature-icon">🫙</div>
+        <div class="feature-text">
+          <div class="feature-name">Баночки для накопичень</div>
+          <div class="feature-status soon">скоро</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Легкий тактильний відгук на тап по картках "що буде далі" (працює лише в Telegram)
+  if (tg && tg.HapticFeedback) {
+    document.querySelectorAll('.feature-row').forEach(row => {
+      row.addEventListener('click', () => tg.HapticFeedback.impactOccurred('light'));
+    });
   }
 </script>
 
