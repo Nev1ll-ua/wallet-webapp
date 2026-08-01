@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Гаманець</title>
 
-<!-- SDK від Telegram: дає доступ до даних користувача, теми, кнопок -->
+<!-- SDK від Telegram: дає доступ до даних користувача, теми, CloudStorage -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,8 +14,6 @@
 
 <style>
   :root {
-    /* Кольори підтягуємо з теми Telegram (світла/темна тема користувача),
-       а якщо відкрито поза Telegram — використовуємо запасні значення */
     --bg: var(--tg-theme-bg-color, #F4F6F5);
     --bg-secondary: var(--tg-theme-secondary-bg-color, #FFFFFF);
     --text: var(--tg-theme-text-color, #16241F);
@@ -27,95 +25,96 @@
     --jar-light: #14876a;
     --coin: #F2A623;
     --coin-light: #F7C463;
+    --red: #D64545;
+    --green: #1E9E63;
+    --border: rgba(16, 40, 34, 0.08);
 
     --shadow: 0 1px 2px rgba(16, 40, 34, 0.04), 0 8px 24px rgba(16, 40, 34, 0.06);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body {
+    height: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding: max(20px, env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
-    -webkit-tap-highlight-color: transparent;
   }
 
-  .hero {
-    position: relative;
+  #page {
+    padding: max(16px, env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 { font-family: 'Manrope', 'Inter', sans-serif; }
+
+  /* ---------- Топбар ---------- */
+  .topbar {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
-    padding: 20px 0 8px;
-    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    justify-content: space-between;
+    margin-bottom: 16px;
   }
 
-  .hero::before {
-    content: "";
-    position: absolute;
-    top: -40px;
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(circle, rgba(15,110,86,0.14) 0%, rgba(15,110,86,0) 70%);
-    pointer-events: none;
-    z-index: 0;
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 17px;
   }
 
-  .jar-wrap {
-    position: relative;
-    width: 76px;
-    height: 76px;
-    margin-bottom: 14px;
+  .topbar-brand .jar-mini {
+    width: 26px;
+    height: 26px;
   }
 
-  .jar {
-    width: 76px;
-    height: 76px;
-    filter: drop-shadow(0 6px 14px rgba(15, 110, 86, 0.22));
-  }
-
-  .coin-float {
-    animation: bob 2.6s ease-in-out infinite;
-    transform-origin: center;
-  }
-
-  .avatar {
-    width: 56px;
-    height: 56px;
+  .avatar-sm {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    margin-bottom: 12px;
     border: 2px solid var(--bg-secondary);
-    box-shadow: var(--shadow);
   }
 
-  .greeting {
-    font-family: 'Manrope', 'Inter', sans-serif;
-    font-size: 21px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
+  /* ---------- Банер сповіщень ---------- */
+  .notice-banner {
+    background: rgba(30, 158, 99, 0.1);
+    border: 1px solid rgba(30, 158, 99, 0.25);
+    color: var(--green);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
   }
 
-  .subtitle {
-    font-size: 14px;
-    color: var(--hint);
-    margin-top: 4px;
+  .notice-banner button {
+    background: none;
+    border: none;
+    color: var(--green);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
   }
 
+  /* ---------- Картки ---------- */
   .card {
     background: var(--bg-secondary);
     border-radius: 18px;
     padding: 20px;
-    margin-top: 20px;
     box-shadow: var(--shadow);
-    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
-  }
-
-  .balance-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
   }
 
   .balance-label {
@@ -126,71 +125,61 @@
     font-weight: 600;
   }
 
-  .balance-badge {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    background: rgba(15, 110, 86, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    color: var(--jar);
-  }
-
   .balance-value {
     font-family: 'Manrope', sans-serif;
-    font-size: 34px;
+    font-size: 36px;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     margin-top: 6px;
     letter-spacing: -0.02em;
   }
 
-  .balance-hint {
-    font-size: 13px;
-    color: var(--hint);
-    margin-top: 8px;
-    line-height: 1.4;
+  .balance-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
   }
 
-  .roadmap {
-    margin-top: 22px;
-    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+  .balance-actions button {
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
   }
 
-  .roadmap-title {
+  .btn-topup { background: rgba(30, 158, 99, 0.12); color: var(--green); }
+  .btn-expense { background: rgba(214, 69, 69, 0.1); color: var(--red); }
+
+  .section-title {
     font-size: 12px;
     color: var(--hint);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-weight: 600;
-    margin-bottom: 10px;
-    padding-left: 2px;
+    margin: 22px 0 10px 2px;
   }
 
-  .feature-row {
+  /* ---------- Список операцій ---------- */
+  .tx-row {
     display: flex;
     align-items: center;
     gap: 12px;
     background: var(--bg-secondary);
     border-radius: 14px;
-    padding: 14px 16px;
+    padding: 12px 14px;
     margin-bottom: 8px;
     box-shadow: var(--shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .feature-row:active {
-    transform: scale(0.98);
-  }
-
-  .feature-icon {
+  .tx-icon {
     width: 38px;
     height: 38px;
     border-radius: 11px;
     background: rgba(15, 110, 86, 0.1);
-    color: var(--jar);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -198,136 +187,1166 @@
     flex-shrink: 0;
   }
 
-  .feature-text {
-    flex: 1;
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-name { font-size: 14px; font-weight: 600; }
+  .tx-note { font-size: 12px; color: var(--hint); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-amount { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; flex-shrink: 0; }
+  .tx-amount.pos { color: var(--green); }
+  .tx-amount.neg { color: var(--red); }
+
+  .empty-state {
+    text-align: center;
+    padding: 28px 12px;
+    color: var(--hint);
+    font-size: 13px;
+    background: var(--bg-secondary);
+    border-radius: 14px;
   }
 
-  .feature-name {
+  /* ---------- Таббар ---------- */
+  #tabbar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    display: flex;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    z-index: 20;
+  }
+
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    color: var(--hint);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .tab-btn .tab-icon { font-size: 20px; }
+  .tab-btn.active { color: var(--jar); }
+
+  /* ---------- Модалки ---------- */
+  #modal-root:empty { display: none; }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 17, 0.45);
+    display: flex;
+    align-items: flex-end;
+    z-index: 50;
+    animation: fadeIn 0.15s ease;
+  }
+
+  .modal-sheet {
+    background: var(--bg);
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    padding: 10px 18px calc(24px + env(safe-area-inset-bottom));
+    animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    margin: 6px auto 14px;
+  }
+
+  .sheet-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(24px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ---------- Форми ---------- */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--hint);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .field input[type="text"],
+  .field input[type="number"],
+  .field input[type="date"],
+  .field select {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
     font-size: 15px;
+    font-family: inherit;
+  }
+
+  .field input:focus, .field select:focus { outline: 2px solid var(--jar); outline-offset: -1px; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .chip {
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .chip.selected { background: var(--jar); border-color: var(--jar); color: #fff; }
+  .chip.chip-add { border-style: dashed; color: var(--hint); }
+
+  .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+  .icon-btn {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-secondary);
+    font-size: 19px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .icon-btn.selected { border-color: var(--jar); background: rgba(15,110,86,0.1); }
+
+  .btn-primary, .btn-secondary, .btn-danger {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  .btn-primary { background: var(--jar); color: #fff; }
+  .btn-secondary { background: rgba(15,110,86,0.1); color: var(--jar); }
+  .btn-danger { background: rgba(214,69,69,0.1); color: var(--red); }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0 12px;
+    font-size: 14px;
     font-weight: 600;
   }
 
-  .feature-status {
-    font-size: 12px;
-    color: var(--hint);
-    margin-top: 1px;
+  .switch {
+    position: relative;
+    width: 44px; height: 26px;
+    flex-shrink: 0;
+  }
+  .switch input { opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; position: relative; z-index: 1; }
+  .switch-track {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 999px;
+    transition: background 0.15s;
+  }
+  .switch-thumb {
+    position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform 0.15s;
+  }
+  .switch input:checked ~ .switch-track { background: var(--jar); }
+  .switch input:checked ~ .switch-thumb { transform: translateX(18px); }
+
+  .subgrid { display: flex; gap: 10px; }
+  .subgrid .field { flex: 1; }
+
+  /* ---------- Статистика / календар ---------- */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .month-nav button {
+    background: var(--bg-secondary);
+    border: none;
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    font-size: 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .month-nav .month-label { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 16px; }
+
+  .cal-card { background: var(--bg-secondary); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
   }
 
-  .feature-status.soon {
+  .cal-weekday { font-size: 11px; color: var(--hint); font-weight: 700; padding-bottom: 6px; }
+
+  .cal-day {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .cal-day.today { background: rgba(15,110,86,0.1); font-weight: 800; }
+  .cal-day .dots { position: absolute; bottom: 4px; display: flex; gap: 2px; }
+  .cal-day .dot { width: 4px; height: 4px; border-radius: 50%; }
+  .dot-exp { background: var(--red); }
+  .dot-inc { background: var(--green); }
+
+  .stat-summary { display: flex; gap: 10px; margin-top: 14px; }
+  .stat-box { flex: 1; background: var(--bg-secondary); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+  .stat-box .stat-label { font-size: 11px; color: var(--hint); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat-box .stat-value { font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 800; margin-top: 4px; }
+
+  .cat-bar-row { margin-bottom: 12px; }
+  .cat-bar-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .cat-bar-top .cat-name { font-weight: 600; }
+  .cat-bar-top .cat-amount { color: var(--hint); font-variant-numeric: tabular-nums; }
+  .cat-bar-track { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
+  .cat-bar-fill { height: 100%; background: var(--jar); border-radius: 4px; }
+
+  /* ---------- Баночки ---------- */
+  .jar-card {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .jar-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .jar-emoji { font-size: 26px; }
+  .jar-name { font-weight: 700; font-size: 15px; }
+  .jar-sub { font-size: 12px; color: var(--hint); margin-top: 1px; }
+  .jar-amount { margin-left: auto; text-align: right; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 16px; }
+
+  .progress-track { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--jar), var(--jar-light)); border-radius: 4px; }
+
+  .auto-badge {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    font-size: 11px;
+    color: var(--coin);
+    font-weight: 700;
+    margin-top: 8px;
+    background: rgba(242, 166, 35, 0.12);
+    padding: 4px 8px;
+    border-radius: 999px;
   }
 
-  .feature-status.soon::before {
-    content: "";
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--coin);
+  .fab {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1.5px dashed var(--jar);
+    background: rgba(15,110,86,0.06);
+    color: var(--jar);
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 16px;
+    cursor: pointer;
   }
 
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  /* ---------- Онбординг ---------- */
+  .onboard-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    text-align: center;
   }
-
-  @keyframes bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
-  }
+  .onboard-jar { width: 84px; height: 84px; margin: 0 auto 18px; }
+  .onboard-wrap h1 { font-size: 22px; margin-bottom: 8px; }
+  .onboard-wrap p { color: var(--hint); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+  .onboard-wrap .field { text-align: left; margin-bottom: 20px; }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero, .card, .roadmap, .coin-float {
-      animation: none !important;
-    }
+    * { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
 
-<div id="app"></div>
+<div id="page"></div>
+<div id="tabbar" style="display:none">
+  <button class="tab-btn" id="tab-home" onclick="switchTab('home')">
+    <span class="tab-icon">🏠</span>Головна
+  </button>
+  <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">
+    <span class="tab-icon">📅</span>Статистика
+  </button>
+  <button class="tab-btn" id="tab-jars" onclick="switchTab('jars')">
+    <span class="tab-icon">🫙</span>Баночки
+  </button>
+</div>
+<div id="modal-root"></div>
 
 <script>
-  const tg = window.Telegram ? window.Telegram.WebApp : null;
-  const app = document.getElementById('app');
+/* ======================================================================
+   ГАМАНЕЦЬ — Telegram Mini App
+   Дані зберігаються в Telegram CloudStorage (прив'язані до акаунту юзера,
+   не до пристрою). Якщо застосунок відкрито поза Telegram (звичайний
+   браузер, для тестів) — автоматично використовується localStorage,
+   щоб можна було все перевірити без бота.
+   ====================================================================== */
 
-  if (tg) {
-    tg.ready();
-    tg.expand();
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+const hasCloud = !!(tg && tg.CloudStorage && tg.CloudStorage.setItem);
+
+const DEFAULT_CATEGORIES = [
+  { id: 'food',      name: 'Їжа',        icon: '🍔' },
+  { id: 'transport',  name: 'Транспорт',  icon: '🚌' },
+  { id: 'home',       name: 'Житло',      icon: '🏠' },
+  { id: 'fun',        name: 'Розваги',    icon: '🎉' },
+  { id: 'health',     name: 'Здоров\'я',  icon: '💊' },
+  { id: 'clothes',    name: 'Одяг',       icon: '👕' },
+  { id: 'other',      name: 'Інше',       icon: '📦' },
+];
+
+const CATEGORY_ICON_CHOICES = ['🍔','🚌','🏠','🎉','💊','👕','📦','☕','🎮','📱','🐾','🎓','🎁','💡','🧾'];
+const JAR_ICON_CHOICES = ['🫙','🎯','✈️','🏖️','🎮','📱','🚗','🎓','💍','🏡','🎁','👟'];
+const WEEKDAYS_UA = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+const MONTHS_UA = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+
+const state = {
+  tab: 'home',
+  profile: null,
+  categories: [],
+  jars: [],
+  txCache: {},        // "tx_2026_08" -> масив транзакцій цього місяця
+  statsYear: new Date().getFullYear(),
+  statsMonth: new Date().getMonth(), // 0-11
+  autoNotices: [],
+  pendingCategoryId: null, // вибрана категорія у формі витрати
+};
+
+/* ---------------------- CloudStorage / localStorage ---------------------- */
+
+function csSetItem(key, value) {
+  return new Promise((resolve, reject) => {
+    if (!hasCloud) {
+      try { localStorage.setItem('cs_' + key, value); resolve(true); }
+      catch (e) { reject(e); }
+      return;
+    }
+    tg.CloudStorage.setItem(key, value, (err, ok) => err ? reject(err) : resolve(ok));
+  });
+}
+
+function csGetItem(key) {
+  return new Promise((resolve, reject) => {
+    if (!hasCloud) {
+      resolve(localStorage.getItem('cs_' + key) || '');
+      return;
+    }
+    tg.CloudStorage.getItem(key, (err, value) => err ? reject(err) : resolve(value || ''));
+  });
+}
+
+function csRemoveItem(key) {
+  return new Promise((resolve, reject) => {
+    if (!hasCloud) {
+      localStorage.removeItem('cs_' + key);
+      resolve(true);
+      return;
+    }
+    tg.CloudStorage.removeItem(key, (err, ok) => err ? reject(err) : resolve(ok));
+  });
+}
+
+/* ------------------------------- Утиліти ------------------------------- */
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function fmtMoney(n) {
+  const num = Number(n) || 0;
+  return num.toLocaleString('uk-UA', { maximumFractionDigits: 2 }) + ' ₴';
+}
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function todayYMD() {
+  return todayISO().replace(/-/g, '');
+}
+
+function isoToYMD(iso) {
+  return iso.replace(/-/g, '');
+}
+
+function ymdToDate(ymd) {
+  return new Date(Number(ymd.slice(0, 4)), Number(ymd.slice(4, 6)) - 1, Number(ymd.slice(6, 8)));
+}
+
+function fmtDateShort(ymd) {
+  const d = ymdToDate(ymd);
+  return `${d.getDate()} ${MONTHS_UA[d.getMonth()].toLowerCase().slice(0, 3)}`;
+}
+
+function daysBetween(fromYMD, toYMD) {
+  const a = ymdToDate(fromYMD), b = ymdToDate(toYMD);
+  return Math.round((b - a) / 86400000);
+}
+
+function monthKeyFromYMD(ymd) {
+  return `tx_${ymd.slice(0, 4)}_${ymd.slice(4, 6)}`;
+}
+
+function monthKeyFromYM(year, month0) {
+  return `tx_${year}_${String(month0 + 1).padStart(2, '0')}`;
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function haptic(style) {
+  if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style || 'light');
+}
+
+/* ------------------------------ Збереження ------------------------------ */
+
+function saveProfile() { return csSetItem('profile', JSON.stringify(state.profile)); }
+function saveCategories() { return csSetItem('categories', JSON.stringify(state.categories)); }
+function saveJars() { return csSetItem('jars', JSON.stringify(state.jars)); }
+
+async function ensureMonthLoaded(mk) {
+  if (!(mk in state.txCache)) {
+    const raw = await csGetItem(mk);
+    state.txCache[mk] = raw ? JSON.parse(raw) : [];
+  }
+  return state.txCache[mk];
+}
+
+async function saveMonth(mk) {
+  await csSetItem(mk, JSON.stringify(state.txCache[mk]));
+  if (!state.profile.txMonths.includes(mk)) {
+    state.profile.txMonths.push(mk);
+    await saveProfile();
+  }
+}
+
+async function addTransaction(tx) {
+  const mk = monthKeyFromYMD(tx.d);
+  await ensureMonthLoaded(mk);
+  state.txCache[mk].push(tx);
+  await saveMonth(mk);
+}
+
+/* -------------------------------- Ініт ---------------------------------- */
+
+window.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  if (tg) { tg.ready(); tg.expand(); }
+
+  const profileRaw = await csGetItem('profile');
+  if (!profileRaw) {
+    renderOnboarding();
+    return;
   }
 
-  // Дані користувача підставляються, лише якщо Telegram реально їх передав.
-  // Якщо ні (наприклад, сторінку відкрито напряму в браузері) — застосунок
-  // все одно повністю робочий, просто з нейтральним привітанням.
+  state.profile = JSON.parse(profileRaw);
+  const [catRaw, jarRaw] = await Promise.all([csGetItem('categories'), csGetItem('jars')]);
+  state.categories = catRaw ? JSON.parse(catRaw) : DEFAULT_CATEGORIES.map(c => ({ ...c }));
+  state.jars = jarRaw ? JSON.parse(jarRaw) : [];
+
+  await applyAutoSaves();
+
+  document.getElementById('tabbar').style.display = 'flex';
+  renderApp();
+}
+
+/* ------------------------------ Онбординг -------------------------------- */
+
+function renderOnboarding() {
+  const jarSvg = jarIllustration(84);
+  document.getElementById('page').innerHTML = `
+    <div class="onboard-wrap">
+      ${jarSvg}
+      <h1>Вітаю в Гаманці 👋</h1>
+      <p>Перш ніж почати — скажи, скільки грошей у тебе зараз зібрано загалом. Далі ти зможеш додавати витрати, поповнення й баночки для накопичень.</p>
+      <div class="field">
+        <label>Поточний баланс, ₴</label>
+        <input type="number" id="ob-amount" inputmode="decimal" min="0" placeholder="0" autofocus>
+      </div>
+      <button class="btn-primary" onclick="completeOnboarding()">Почати користуватись</button>
+    </div>
+  `;
+}
+
+async function completeOnboarding() {
+  const amount = Number(document.getElementById('ob-amount').value) || 0;
+  state.profile = { balance: amount, txMonths: [], createdAt: todayYMD(), onboarded: true };
+  state.categories = DEFAULT_CATEGORIES.map(c => ({ ...c }));
+  state.jars = [];
+  await Promise.all([saveProfile(), saveCategories(), saveJars()]);
+  document.getElementById('tabbar').style.display = 'flex';
+  renderApp();
+}
+
+/* -------------------------------- Роутер --------------------------------- */
+
+function switchTab(tab) {
+  state.tab = tab;
+  haptic('light');
+  renderApp();
+}
+
+async function renderApp() {
+  ['home', 'stats', 'jars'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', state.tab === t);
+  });
+
+  if (state.tab === 'home') await renderHome();
+  else if (state.tab === 'stats') await renderStats();
+  else if (state.tab === 'jars') renderJars();
+}
+
+/* -------------------------------- Ілюстрація -------------------------------- */
+
+function jarIllustration(size) {
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 76 76" fill="none" style="margin:0 auto 14px;display:block;filter:drop-shadow(0 6px 14px rgba(15,110,86,0.22))">
+      <rect x="17" y="10" width="42" height="10" rx="4" fill="var(--jar)" opacity="0.35"/>
+      <path d="M15 24 C15 20 18 18 21 18 H55 C58 18 61 20 61 24 V58 C61 63 57 67 52 67 H24 C19 67 15 63 15 58 Z"
+            fill="var(--bg-secondary)" stroke="var(--jar)" stroke-width="2.5"/>
+      <circle cx="38" cy="41" r="7.5" fill="var(--coin)"/>
+      <circle cx="25" cy="53" r="5.5" fill="var(--coin-light)"/>
+    </svg>
+  `;
+}
+
+function jarIconMini() {
+  return `
+    <svg class="jar-mini" viewBox="0 0 76 76" fill="none">
+      <rect x="17" y="10" width="42" height="10" rx="4" fill="var(--jar)" opacity="0.35"/>
+      <path d="M15 24 C15 20 18 18 21 18 H55 C58 18 61 20 61 24 V58 C61 63 57 67 52 67 H24 C19 67 15 63 15 58 Z"
+            fill="var(--bg-secondary)" stroke="var(--jar)" stroke-width="2.5"/>
+      <circle cx="38" cy="41" r="7.5" fill="var(--coin)"/>
+      <circle cx="25" cy="53" r="5.5" fill="var(--coin-light)"/>
+    </svg>
+  `;
+}
+
+/* -------------------------------- Головна -------------------------------- */
+
+async function renderHome() {
   const user = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
   const name = (user && user.first_name) || 'друже';
   const photo = user && user.photo_url;
 
-  // Проста SVG-баночка — візуальна "фішка" застосунку
-  const jarSvg = `
-    <svg class="jar" viewBox="0 0 76 76" fill="none">
-      <rect x="17" y="10" width="42" height="10" rx="4" fill="var(--jar)" opacity="0.35"/>
-      <path d="M15 24 C15 20 18 18 21 18 H55 C58 18 61 20 61 24 V58 C61 63 57 67 52 67 H24 C19 67 15 63 15 58 Z"
-            fill="var(--bg-secondary)" stroke="var(--jar)" stroke-width="2.5"/>
-      <g class="coin-float">
-        <circle cx="38" cy="41" r="7.5" fill="var(--coin)"/>
-        <circle cx="25" cy="53" r="5.5" fill="var(--coin-light)"/>
-      </g>
-    </svg>
-  `;
+  const mk = monthKeyFromYMD(todayYMD());
+  await ensureMonthLoaded(mk);
+  const recent = state.txCache[mk].slice(-5).reverse();
 
-  app.innerHTML = `
-    <div class="hero">
-      ${photo ? `<img class="avatar" src="${photo}" alt="">` : `<div class="jar-wrap">${jarSvg}</div>`}
-      <div class="greeting">Привіт, ${name}!</div>
-      <div class="subtitle">Це твій гаманець</div>
+  const noticeHtml = state.autoNotices.length ? `
+    <div class="notice-banner">
+      <div>${state.autoNotices.map(n => escapeHtml(n)).join('<br>')}</div>
+      <button onclick="dismissNotices()">✕</button>
     </div>
+  ` : '';
+
+  document.getElementById('page').innerHTML = `
+    <div class="topbar">
+      <div class="topbar-brand">${jarIconMini()}<span>Гаманець</span></div>
+      ${photo ? `<img class="avatar-sm" src="${photo}" alt="">` : ''}
+    </div>
+
+    ${noticeHtml}
 
     <div class="card">
-      <div class="balance-row">
-        <div class="balance-label">Загальний баланс</div>
-        <div class="balance-badge">₴</div>
+      <div class="balance-label">Баланс — привіт, ${escapeHtml(name)}</div>
+      <div class="balance-value">${fmtMoney(state.profile.balance)}</div>
+      <div class="balance-actions">
+        <button class="btn-topup" onclick="openTopupModal()">＋ Поповнити</button>
+        <button class="btn-expense" onclick="openExpenseModal()">－ Витрата</button>
       </div>
-      <div class="balance-value">— грн</div>
-      <div class="balance-hint">Поки що тут порожньо — далі додамо можливість вписати суму</div>
     </div>
 
-    <div class="roadmap">
-      <div class="roadmap-title">Що буде далі</div>
+    <div class="section-title">Останні операції цього місяця</div>
+    <div id="recent-list">
+      ${recent.length ? recent.map(txRowHtml).join('') : `<div class="empty-state">Поки що немає операцій цього місяця</div>`}
+    </div>
+  `;
+}
 
-      <div class="feature-row">
-        <div class="feature-icon">₴</div>
-        <div class="feature-text">
-          <div class="feature-name">Категорії витрат</div>
-          <div class="feature-status soon">скоро</div>
+function dismissNotices() {
+  state.autoNotices = [];
+  const el = document.querySelector('.notice-banner');
+  if (el) el.remove();
+}
+
+function txRowHtml(tx) {
+  if (tx.t === 'i') {
+    return `
+      <div class="tx-row">
+        <div class="tx-icon">💰</div>
+        <div class="tx-info">
+          <div class="tx-name">Поповнення</div>
+          ${tx.n ? `<div class="tx-note">${escapeHtml(tx.n)}</div>` : ''}
+        </div>
+        <div class="tx-amount pos">+${fmtMoney(tx.a)}</div>
+      </div>
+    `;
+  }
+  const cat = state.categories.find(c => c.id === tx.c) || { name: 'Інше', icon: '📦' };
+  return `
+    <div class="tx-row">
+      <div class="tx-icon">${cat.icon}</div>
+      <div class="tx-info">
+        <div class="tx-name">${escapeHtml(cat.name)}</div>
+        ${tx.n ? `<div class="tx-note">${escapeHtml(tx.n)}</div>` : `<div class="tx-note">${fmtDateShort(tx.d)}</div>`}
+      </div>
+      <div class="tx-amount neg">−${fmtMoney(tx.a)}</div>
+    </div>
+  `;
+}
+
+/* ---------------------------- Модалка: поповнення ---------------------------- */
+
+function openTopupModal() {
+  showModal(`
+    <div class="sheet-title">Поповнити баланс</div>
+    <div class="field">
+      <label>Сума, ₴</label>
+      <input type="number" id="topup-amount" inputmode="decimal" min="0.01" step="0.01" placeholder="0" autofocus>
+    </div>
+    <div class="field">
+      <label>Нотатка (необов'язково)</label>
+      <input type="text" id="topup-note" placeholder="Наприклад: зарплата">
+    </div>
+    <div class="field">
+      <label>Дата</label>
+      <input type="date" id="topup-date" value="${todayISO()}" max="${todayISO()}">
+    </div>
+    <button class="btn-primary" onclick="submitTopup()">Додати поповнення</button>
+  `);
+}
+
+async function submitTopup() {
+  const amount = Number(document.getElementById('topup-amount').value);
+  if (!amount || amount <= 0) { alert('Введи суму більше нуля'); return; }
+  const note = document.getElementById('topup-note').value.trim();
+  const date = isoToYMD(document.getElementById('topup-date').value || todayISO());
+
+  await addTransaction({ i: uid(), t: 'i', a: amount, n: note, d: date });
+  state.profile.balance += amount;
+  await saveProfile();
+
+  closeModal();
+  haptic('medium');
+  renderApp();
+}
+
+/* ----------------------------- Модалка: витрата ----------------------------- */
+
+function openExpenseModal() {
+  state.pendingCategoryId = state.categories[0] ? state.categories[0].id : null;
+  showModal(expenseModalHtml());
+}
+
+function expenseModalHtml() {
+  return `
+    <div class="sheet-title">Додати витрату</div>
+    <div class="field">
+      <label>Сума, ₴</label>
+      <input type="number" id="exp-amount" inputmode="decimal" min="0.01" step="0.01" placeholder="0" autofocus>
+    </div>
+    <div class="field">
+      <label>Категорія</label>
+      <div class="chip-row" id="exp-cat-chips">
+        ${state.categories.map(c => `
+          <div class="chip ${c.id === state.pendingCategoryId ? 'selected' : ''}" onclick="selectExpenseCategory('${c.id}')">
+            ${c.icon} ${escapeHtml(c.name)}
+          </div>
+        `).join('')}
+        <div class="chip chip-add" onclick="openNewCategoryForm()">+ своя</div>
+      </div>
+      <div id="new-cat-form"></div>
+    </div>
+    <div class="field">
+      <label>Нотатка (необов'язково)</label>
+      <input type="text" id="exp-note" placeholder="Наприклад: обід у кафе">
+    </div>
+    <div class="field">
+      <label>Дата</label>
+      <input type="date" id="exp-date" value="${todayISO()}" max="${todayISO()}">
+    </div>
+    <button class="btn-primary" onclick="submitExpense()">Додати витрату</button>
+  `;
+}
+
+function selectExpenseCategory(id) {
+  state.pendingCategoryId = id;
+  document.getElementById('exp-cat-chips').querySelectorAll('.chip').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+function openNewCategoryForm() {
+  document.getElementById('new-cat-form').innerHTML = `
+    <div class="field" style="margin-top:10px">
+      <label>Назва категорії</label>
+      <input type="text" id="new-cat-name" placeholder="Наприклад: Подарунки">
+    </div>
+    <div class="field">
+      <label>Іконка</label>
+      <div class="icon-picker" id="new-cat-icons">
+        ${CATEGORY_ICON_CHOICES.map((ic, idx) => `
+          <div class="icon-btn ${idx === 0 ? 'selected' : ''}" data-icon="${ic}" onclick="pickCatIcon(this)">${ic}</div>
+        `).join('')}
+      </div>
+    </div>
+    <button class="btn-secondary" onclick="saveNewCategory()">Зберегти категорію</button>
+  `;
+}
+
+function pickCatIcon(el) {
+  el.parentElement.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function saveNewCategory() {
+  const name = document.getElementById('new-cat-name').value.trim();
+  if (!name) { alert('Введи назву категорії'); return; }
+  const iconEl = document.querySelector('#new-cat-icons .icon-btn.selected');
+  const icon = iconEl ? iconEl.dataset.icon : '📦';
+  const newCat = { id: uid(), name, icon };
+  state.categories.push(newCat);
+  await saveCategories();
+  state.pendingCategoryId = newCat.id;
+  document.querySelector('.modal-sheet').innerHTML = expenseModalHtml();
+}
+
+async function submitExpense() {
+  const amount = Number(document.getElementById('exp-amount').value);
+  if (!amount || amount <= 0) { alert('Введи суму більше нуля'); return; }
+  if (!state.pendingCategoryId) { alert('Обери категорію'); return; }
+  const note = document.getElementById('exp-note').value.trim();
+  const date = isoToYMD(document.getElementById('exp-date').value || todayISO());
+
+  await addTransaction({ i: uid(), t: 'e', c: state.pendingCategoryId, a: amount, n: note, d: date });
+  state.profile.balance -= amount;
+  await saveProfile();
+
+  closeModal();
+  haptic('medium');
+  renderApp();
+}
+
+/* -------------------------------- Статистика -------------------------------- */
+
+async function renderStats() {
+  const year = state.statsYear, month = state.statsMonth;
+  const mk = monthKeyFromYM(year, month);
+  await ensureMonthLoaded(mk);
+  const txs = state.txCache[mk];
+
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7; // Пн = 0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = todayYMD();
+
+  let totalExp = 0, totalInc = 0;
+  const byDay = {};
+  const byCat = {};
+  txs.forEach(tx => {
+    if (tx.t === 'e') {
+      totalExp += tx.a;
+      byCat[tx.c] = (byCat[tx.c] || 0) + tx.a;
+    } else {
+      totalInc += tx.a;
+    }
+    (byDay[tx.d] = byDay[tx.d] || []).push(tx);
+  });
+
+  let cells = '';
+  for (let i = 0; i < firstWeekday; i++) cells += `<div></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dStr = `${year}${String(month + 1).padStart(2, '0')}${String(d).padStart(2, '0')}`;
+    const dayTxs = byDay[dStr] || [];
+    const hasExp = dayTxs.some(t => t.t === 'e');
+    const hasInc = dayTxs.some(t => t.t === 'i');
+    cells += `
+      <button class="cal-day ${dStr === todayStr ? 'today' : ''}" onclick="openDayModal('${dStr}')">
+        ${d}
+        ${(hasExp || hasInc) ? `<div class="dots">${hasExp ? '<span class="dot dot-exp"></span>' : ''}${hasInc ? '<span class="dot dot-inc"></span>' : ''}</div>` : ''}
+      </button>
+    `;
+  }
+
+  const maxCat = Math.max(1, ...Object.values(byCat));
+  const catRows = Object.entries(byCat)
+    .sort((a, b) => b[1] - a[1])
+    .map(([catId, sum]) => {
+      const cat = state.categories.find(c => c.id === catId) || { name: 'Інше', icon: '📦' };
+      const pct = Math.round((sum / maxCat) * 100);
+      return `
+        <div class="cat-bar-row">
+          <div class="cat-bar-top">
+            <span class="cat-name">${cat.icon} ${escapeHtml(cat.name)}</span>
+            <span class="cat-amount">${fmtMoney(sum)}</span>
+          </div>
+          <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      `;
+    }).join('');
+
+  document.getElementById('page').innerHTML = `
+    <div class="topbar"><div class="topbar-brand"><span>Статистика</span></div></div>
+
+    <div class="month-nav">
+      <button onclick="shiftMonth(-1)">‹</button>
+      <div class="month-label">${MONTHS_UA[month]} ${year}</div>
+      <button onclick="shiftMonth(1)">›</button>
+    </div>
+
+    <div class="cal-card">
+      <div class="cal-grid">
+        ${WEEKDAYS_UA.map(w => `<div class="cal-weekday">${w}</div>`).join('')}
+        ${cells}
+      </div>
+    </div>
+
+    <div class="stat-summary">
+      <div class="stat-box">
+        <div class="stat-label">Витрачено</div>
+        <div class="stat-value" style="color:var(--red)">−${fmtMoney(totalExp)}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Поповнено</div>
+        <div class="stat-value" style="color:var(--green)">+${fmtMoney(totalInc)}</div>
+      </div>
+    </div>
+
+    <div class="section-title">Витрати за категоріями</div>
+    ${catRows || `<div class="empty-state">Цього місяця ще немає витрат</div>`}
+  `;
+}
+
+function shiftMonth(delta) {
+  state.statsMonth += delta;
+  if (state.statsMonth < 0) { state.statsMonth = 11; state.statsYear--; }
+  if (state.statsMonth > 11) { state.statsMonth = 0; state.statsYear++; }
+  renderApp();
+}
+
+function openDayModal(dStr) {
+  const mk = monthKeyFromYMD(dStr);
+  const txs = (state.txCache[mk] || []).filter(t => t.d === dStr);
+  const d = ymdToDate(dStr);
+  const label = `${d.getDate()} ${MONTHS_UA[d.getMonth()].toLowerCase()} ${d.getFullYear()}`;
+
+  showModal(`
+    <div class="sheet-title">${label}</div>
+    ${txs.length ? txs.slice().reverse().map(txRowHtml).join('') : `<div class="empty-state">Немає операцій за цей день</div>`}
+  `);
+}
+
+/* --------------------------------- Баночки --------------------------------- */
+
+function renderJars() {
+  document.getElementById('page').innerHTML = `
+    <div class="topbar"><div class="topbar-brand"><span>Баночки</span></div></div>
+
+    <button class="fab" onclick="openNewJarModal()">🫙 + Нова баночка</button>
+
+    ${state.jars.length ? state.jars.map(jarCardHtml).join('') : `<div class="empty-state">Ще немає жодної баночки — створи першу, щоб почати відкладати на щось конкретне</div>`}
+  `;
+}
+
+function jarCardHtml(jar) {
+  const pct = jar.goal > 0 ? Math.min(100, Math.round((jar.saved / jar.goal) * 100)) : null;
+  const autoLabel = jar.auto ? `🔁 +${fmtMoney(jar.auto.amount)} кожні ${jar.auto.everyDays === 1 ? 'день' : jar.auto.everyDays + ' дн.'}` : '';
+  return `
+    <div class="jar-card" onclick="openJarDetail('${jar.id}')">
+      <div class="jar-top">
+        <div class="jar-emoji">${jar.icon}</div>
+        <div>
+          <div class="jar-name">${escapeHtml(jar.name)}</div>
+          <div class="jar-sub">${jar.goal > 0 ? `ціль ${fmtMoney(jar.goal)}` : 'без цілі'}</div>
+        </div>
+        <div class="jar-amount">${fmtMoney(jar.saved)}</div>
+      </div>
+      ${pct !== null ? `<div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>` : ''}
+      ${autoLabel ? `<div class="auto-badge">${autoLabel}</div>` : ''}
+    </div>
+  `;
+}
+
+function openNewJarModal() {
+  showModal(`
+    <div class="sheet-title">Нова баночка</div>
+    <div class="field">
+      <label>Назва</label>
+      <input type="text" id="jar-name" placeholder="Наприклад: Відпустка" autofocus>
+    </div>
+    <div class="field">
+      <label>Іконка</label>
+      <div class="icon-picker" id="jar-icons">
+        ${JAR_ICON_CHOICES.map((ic, idx) => `
+          <div class="icon-btn ${idx === 0 ? 'selected' : ''}" data-icon="${ic}" onclick="pickJarIcon(this)">${ic}</div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="field">
+      <label>Ціль, ₴ (необов'язково)</label>
+      <input type="number" id="jar-goal" inputmode="decimal" min="0" placeholder="0 — без цілі">
+    </div>
+
+    <div class="toggle-row">
+      <span>Відкладати автоматично</span>
+      <label class="switch">
+        <input type="checkbox" id="jar-auto-toggle" onchange="toggleJarAutoFields(this.checked)">
+        <span class="switch-track"></span><span class="switch-thumb"></span>
+      </label>
+    </div>
+    <div id="jar-auto-fields" style="display:none">
+      <div class="subgrid">
+        <div class="field">
+          <label>Сума, ₴</label>
+          <input type="number" id="jar-auto-amount" inputmode="decimal" min="0.01" placeholder="50">
+        </div>
+        <div class="field">
+          <label>Періодичність</label>
+          <select id="jar-auto-period">
+            <option value="1">Щодня</option>
+            <option value="7">Щотижня</option>
+            <option value="30">Щомісяця</option>
+          </select>
         </div>
       </div>
+    </div>
 
-      <div class="feature-row">
-        <div class="feature-icon">📅</div>
-        <div class="feature-text">
-          <div class="feature-name">Календар і статистика</div>
-          <div class="feature-status soon">скоро</div>
+    <button class="btn-primary" onclick="submitNewJar()">Створити баночку</button>
+  `);
+}
+
+function pickJarIcon(el) {
+  el.parentElement.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleJarAutoFields(checked) {
+  document.getElementById('jar-auto-fields').style.display = checked ? 'block' : 'none';
+}
+
+async function submitNewJar() {
+  const name = document.getElementById('jar-name').value.trim();
+  if (!name) { alert('Введи назву баночки'); return; }
+  const iconEl = document.querySelector('#jar-icons .icon-btn.selected');
+  const icon = iconEl ? iconEl.dataset.icon : '🫙';
+  const goal = Number(document.getElementById('jar-goal').value) || 0;
+
+  let auto = null;
+  if (document.getElementById('jar-auto-toggle').checked) {
+    const amount = Number(document.getElementById('jar-auto-amount').value);
+    if (!amount || amount <= 0) { alert('Вкажи суму автовідкладання'); return; }
+    const everyDays = Number(document.getElementById('jar-auto-period').value);
+    auto = { amount, everyDays, lastRun: todayYMD() };
+  }
+
+  state.jars.push({ id: uid(), name, icon, goal, saved: 0, auto, createdAt: todayYMD() });
+  await saveJars();
+
+  closeModal();
+  haptic('medium');
+  renderApp();
+}
+
+function openJarDetail(jarId) {
+  const jar = state.jars.find(j => j.id === jarId);
+  if (!jar) return;
+  const pct = jar.goal > 0 ? Math.min(100, Math.round((jar.saved / jar.goal) * 100)) : null;
+
+  showModal(`
+    <div class="sheet-title">${jar.icon} ${escapeHtml(jar.name)}</div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="balance-label">Накопичено</div>
+      <div class="balance-value" style="font-size:28px">${fmtMoney(jar.saved)}</div>
+      ${jar.goal > 0 ? `
+        <div class="tx-note" style="margin:8px 0 6px">ціль ${fmtMoney(jar.goal)} · ${pct}%</div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ` : ''}
+    </div>
+
+    <div class="field">
+      <label>Додати вручну, ₴ (перейде з балансу)</label>
+      <input type="number" id="jar-add-amount" inputmode="decimal" min="0.01" placeholder="0">
+    </div>
+    <button class="btn-secondary" onclick="addToJar('${jar.id}')">Додати в баночку</button>
+
+    <div class="section-title">Автовідкладання</div>
+    ${jar.auto ? `
+      <div class="tx-note" style="margin-bottom:10px">🔁 +${fmtMoney(jar.auto.amount)} кожні ${jar.auto.everyDays === 1 ? 'день' : jar.auto.everyDays + ' дн.'}</div>
+      <button class="btn-danger" onclick="cancelJarAuto('${jar.id}')">Скасувати автовідкладання</button>
+    ` : `
+      <div class="subgrid">
+        <div class="field">
+          <label>Сума, ₴</label>
+          <input type="number" id="jar-auto-amount-2" inputmode="decimal" min="0.01" placeholder="50">
+        </div>
+        <div class="field">
+          <label>Періодичність</label>
+          <select id="jar-auto-period-2">
+            <option value="1">Щодня</option>
+            <option value="7">Щотижня</option>
+            <option value="30">Щомісяця</option>
+          </select>
         </div>
       </div>
+      <button class="btn-secondary" onclick="enableJarAuto('${jar.id}')">Увімкнути автовідкладання</button>
+    `}
 
-      <div class="feature-row">
-        <div class="feature-icon">🫙</div>
-        <div class="feature-text">
-          <div class="feature-name">Баночки для накопичень</div>
-          <div class="feature-status soon">скоро</div>
-        </div>
+    <div class="section-title">Небезпечна зона</div>
+    <button class="btn-danger" onclick="deleteJar('${jar.id}')">Видалити баночку</button>
+  `);
+}
+
+async function addToJar(jarId) {
+  const amount = Number(document.getElementById('jar-add-amount').value);
+  if (!amount || amount <= 0) { alert('Введи суму більше нуля'); return; }
+  if (amount > state.profile.balance) { alert('Недостатньо коштів на балансі'); return; }
+
+  const jar = state.jars.find(j => j.id === jarId);
+  jar.saved += amount;
+  state.profile.balance -= amount;
+  await Promise.all([saveJars(), saveProfile()]);
+
+  closeModal();
+  haptic('medium');
+  renderApp();
+}
+
+async function enableJarAuto(jarId) {
+  const amount = Number(document.getElementById('jar-auto-amount-2').value);
+  if (!amount || amount <= 0) { alert('Вкажи суму автовідкладання'); return; }
+  const everyDays = Number(document.getElementById('jar-auto-period-2').value);
+
+  const jar = state.jars.find(j => j.id === jarId);
+  jar.auto = { amount, everyDays, lastRun: todayYMD() };
+  await saveJars();
+
+  closeModal();
+  renderApp();
+}
+
+async function cancelJarAuto(jarId) {
+  const jar = state.jars.find(j => j.id === jarId);
+  jar.auto = null;
+  await saveJars();
+  closeModal();
+  renderApp();
+}
+
+async function deleteJar(jarId) {
+  const jar = state.jars.find(j => j.id === jarId);
+  if (!jar) return;
+  const refund = jar.saved > 0 ? confirm(`Видалити баночку і повернути ${fmtMoney(jar.saved)} на баланс?`) : confirm('Видалити цю баночку?');
+  if (!refund && jar.saved > 0) return;
+
+  if (jar.saved > 0) {
+    state.profile.balance += jar.saved;
+    await saveProfile();
+  }
+  state.jars = state.jars.filter(j => j.id !== jarId);
+  await saveJars();
+
+  closeModal();
+  renderApp();
+}
+
+/* ------------------------------ Автовідкладання ------------------------------ */
+
+async function applyAutoSaves() {
+  const today = todayYMD();
+  let changed = false;
+  state.autoNotices = [];
+
+  for (const jar of state.jars) {
+    if (!jar.auto) continue;
+    const passed = daysBetween(jar.auto.lastRun, today);
+    const periods = Math.floor(passed / jar.auto.everyDays);
+    if (periods <= 0) continue;
+
+    const wanted = periods * jar.auto.amount;
+    const available = Math.max(0, state.profile.balance);
+    const moved = Math.min(wanted, available);
+
+    if (moved > 0) {
+      state.profile.balance -= moved;
+      jar.saved += moved;
+      state.autoNotices.push(`🔁 Поки тебе не було: +${fmtMoney(moved)} у баночку «${jar.name}» (автоматично)`);
+      changed = true;
+    }
+    jar.auto.lastRun = today;
+    changed = true;
+  }
+
+  if (changed) {
+    await Promise.all([saveProfile(), saveJars()]);
+  }
+}
+
+/* --------------------------------- Модалки --------------------------------- */
+
+function showModal(html) {
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-backdrop" onclick="closeModal()">
+      <div class="modal-sheet" onclick="event.stopPropagation()">
+        <div class="sheet-handle"></div>
+        ${html}
       </div>
     </div>
   `;
+}
 
-  // Легкий тактильний відгук на тап по картках "що буде далі" (працює лише в Telegram)
-  if (tg && tg.HapticFeedback) {
-    document.querySelectorAll('.feature-row').forEach(row => {
-      row.addEventListener('click', () => tg.HapticFeedback.impactOccurred('light'));
-    });
-  }
+function closeModal() {
+  document.getElementById('modal-root').innerHTML = '';
+}
 </script>
 
 </body>
