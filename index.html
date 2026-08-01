@@ -28,8 +28,18 @@
     --red: #D64545;
     --green: #1E9E63;
     --border: rgba(16, 40, 34, 0.08);
+    --card-border: rgba(16, 40, 34, 0.07);
 
     --shadow: 0 1px 2px rgba(16, 40, 34, 0.04), 0 8px 24px rgba(16, 40, 34, 0.06);
+  }
+
+  /* Телеграм повідомляє тему через tg.colorScheme / prefers-color-scheme —
+     ставимо data-theme на <html> в JS (applyThemeClass) і тут підсилюємо
+     контраст обводок, бо напівпрозорий темний бордер губиться на темному фоні. */
+  html[data-theme="dark"] {
+    --border: rgba(255, 255, 255, 0.14);
+    --card-border: rgba(255, 255, 255, 0.12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -82,6 +92,27 @@
     border: 2px solid var(--bg-secondary);
   }
 
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .icon-btn-ghost {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    cursor: pointer;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+
   /* ---------- Банер сповіщень ---------- */
   .notice-banner {
     background: rgba(30, 158, 99, 0.1);
@@ -115,6 +146,7 @@
     border-radius: 18px;
     padding: 20px;
     box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
   }
 
   .balance-label {
@@ -173,6 +205,7 @@
     padding: 12px 14px;
     margin-bottom: 8px;
     box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
   }
 
   .tx-icon {
@@ -201,6 +234,7 @@
     font-size: 13px;
     background: var(--bg-secondary);
     border-radius: 14px;
+    border: 1px solid var(--card-border);
   }
 
   /* ---------- Таббар ---------- */
@@ -253,7 +287,9 @@
     overflow-y: auto;
     border-radius: 20px 20px 0 0;
     padding: 10px 18px calc(24px + env(safe-area-inset-bottom));
-    animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--card-border);
+    border-bottom: none;
   }
 
   .sheet-handle {
@@ -272,6 +308,30 @@
 
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp { from { transform: translateY(24px); opacity: 0.6; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ---------- Плавна поява елементів зверху вниз ---------- */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Верхньорівневі блоки сторінки з'являються по черзі, зверху вниз */
+  #page > * {
+    animation: fadeSlideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  #page > *:nth-child(1) { animation-delay: 0ms; }
+  #page > *:nth-child(2) { animation-delay: 40ms; }
+  #page > *:nth-child(3) { animation-delay: 80ms; }
+  #page > *:nth-child(4) { animation-delay: 120ms; }
+  #page > *:nth-child(5) { animation-delay: 160ms; }
+  #page > *:nth-child(6) { animation-delay: 200ms; }
+  #page > *:nth-child(n+7) { animation-delay: 220ms; }
+
+  /* Списки (операції, баночки, категорії) каскадом всередині свого контейнера */
+  .tx-row, .jar-card, .cat-bar-row {
+    animation: fadeSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 45ms);
+  }
 
   /* ---------- Форми ---------- */
   .field { margin-bottom: 14px; }
@@ -316,6 +376,34 @@
 
   .chip.selected { background: var(--jar); border-color: var(--jar); color: #fff; }
   .chip.chip-add { border-style: dashed; color: var(--hint); }
+  .chip.chip-add.selected { border-style: solid; background: var(--jar); border-color: var(--jar); color: #fff; }
+
+  .new-cat-box {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1.5px solid var(--jar);
+    background: rgba(15, 110, 86, 0.06);
+    animation: fadeSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .new-cat-box-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--jar);
+    margin-bottom: 12px;
+  }
+  .new-cat-box-close {
+    background: none;
+    border: none;
+    color: var(--jar);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
 
   .icon-picker { display: flex; flex-wrap: wrap; gap: 8px; }
   .icon-btn {
@@ -389,16 +477,17 @@
   }
   .month-nav button {
     background: var(--bg-secondary);
-    border: none;
+    border: 1px solid var(--card-border);
     width: 36px; height: 36px;
     border-radius: 10px;
     font-size: 16px;
     box-shadow: var(--shadow);
     cursor: pointer;
+    color: var(--text);
   }
   .month-nav .month-label { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 16px; }
 
-  .cal-card { background: var(--bg-secondary); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); }
+  .cal-card { background: var(--bg-secondary); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
 
   .cal-grid {
     display: grid;
@@ -430,7 +519,7 @@
   .dot-inc { background: var(--green); }
 
   .stat-summary { display: flex; gap: 10px; margin-top: 14px; }
-  .stat-box { flex: 1; background: var(--bg-secondary); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+  .stat-box { flex: 1; background: var(--bg-secondary); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
   .stat-box .stat-label { font-size: 11px; color: var(--hint); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
   .stat-box .stat-value { font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 800; margin-top: 4px; }
 
@@ -449,6 +538,7 @@
     margin-bottom: 10px;
     box-shadow: var(--shadow);
     cursor: pointer;
+    border: 1px solid var(--card-border);
   }
   .jar-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   .jar-emoji { font-size: 26px; }
@@ -556,6 +646,9 @@ const state = {
   txCache: {},        // "tx_2026_08" -> масив транзакцій цього місяця
   statsYear: new Date().getFullYear(),
   statsMonth: new Date().getMonth(), // 0-11
+  statsMode: 'month',  // 'month' | 'range'
+  statsRangeFrom: null, // ISO дата, обирається при першому відкритті режиму "Період"
+  statsRangeTo: null,   // ISO дата
   autoNotices: [],
   pendingCategoryId: null, // вибрана категорія у формі витрати
 };
@@ -648,6 +741,15 @@ function haptic(style) {
   if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style || 'light');
 }
 
+/* Позначаємо <html data-theme="dark|light"> — на це реагують CSS-змінні
+   --border / --card-border / --shadow, щоб картки не губились у темній темі. */
+function applyThemeClass() {
+  let isDark = false;
+  if (tg && tg.colorScheme) isDark = tg.colorScheme === 'dark';
+  else if (window.matchMedia) isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+}
+
 /* ------------------------------ Збереження ------------------------------ */
 
 function saveProfile() { return csSetItem('profile', JSON.stringify(state.profile)); }
@@ -682,7 +784,12 @@ async function addTransaction(tx) {
 window.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-  if (tg) { tg.ready(); tg.expand(); }
+  applyThemeClass();
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    if (tg.onEvent) tg.onEvent('themeChanged', applyThemeClass);
+  }
 
   const profileRaw = await csGetItem('profile');
   if (!profileRaw) {
@@ -773,12 +880,27 @@ function jarIconMini() {
   `;
 }
 
+/* -------------------------------- Топбар -------------------------------- */
+
+function topbarHtml(brandHtml, showAvatar) {
+  const user = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+  const photo = showAvatar && user && user.photo_url;
+  return `
+    <div class="topbar">
+      <div class="topbar-brand">${brandHtml}</div>
+      <div class="topbar-actions">
+        ${photo ? `<img class="avatar-sm" src="${photo}" alt="">` : ''}
+        <button class="icon-btn-ghost" onclick="openSettingsModal()" aria-label="Налаштування">⚙️</button>
+      </div>
+    </div>
+  `;
+}
+
 /* -------------------------------- Головна -------------------------------- */
 
 async function renderHome() {
   const user = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
   const name = (user && user.first_name) || 'друже';
-  const photo = user && user.photo_url;
 
   const mk = monthKeyFromYMD(todayYMD());
   await ensureMonthLoaded(mk);
@@ -792,10 +914,7 @@ async function renderHome() {
   ` : '';
 
   document.getElementById('page').innerHTML = `
-    <div class="topbar">
-      <div class="topbar-brand">${jarIconMini()}<span>Гаманець</span></div>
-      ${photo ? `<img class="avatar-sm" src="${photo}" alt="">` : ''}
-    </div>
+    ${topbarHtml(`${jarIconMini()}<span>Гаманець</span>`, true)}
 
     ${noticeHtml}
 
@@ -810,7 +929,7 @@ async function renderHome() {
 
     <div class="section-title">Останні операції цього місяця</div>
     <div id="recent-list">
-      ${recent.length ? recent.map(txRowHtml).join('') : `<div class="empty-state">Поки що немає операцій цього місяця</div>`}
+      ${recent.length ? recent.map((tx, i) => txRowHtml(tx, i)).join('') : `<div class="empty-state">Поки що немає операцій цього місяця</div>`}
     </div>
   `;
 }
@@ -821,10 +940,11 @@ function dismissNotices() {
   if (el) el.remove();
 }
 
-function txRowHtml(tx) {
+function txRowHtml(tx, i) {
+  const style = i != null ? ` style="--i:${i}"` : '';
   if (tx.t === 'i') {
     return `
-      <div class="tx-row">
+      <div class="tx-row"${style}>
         <div class="tx-icon">💰</div>
         <div class="tx-info">
           <div class="tx-name">Поповнення</div>
@@ -836,7 +956,7 @@ function txRowHtml(tx) {
   }
   const cat = state.categories.find(c => c.id === tx.c) || { name: 'Інше', icon: '📦' };
   return `
-    <div class="tx-row">
+    <div class="tx-row"${style}>
       <div class="tx-icon">${cat.icon}</div>
       <div class="tx-info">
         <div class="tx-name">${escapeHtml(cat.name)}</div>
@@ -905,9 +1025,9 @@ function expenseModalHtml() {
             ${c.icon} ${escapeHtml(c.name)}
           </div>
         `).join('')}
-        <div class="chip chip-add" onclick="openNewCategoryForm()">+ своя</div>
+        <div class="chip chip-add" id="chip-add-category" onclick="toggleNewCategoryForm()">+ своя</div>
       </div>
-      <div id="new-cat-form"></div>
+      <div id="new-cat-form" data-open="0"></div>
     </div>
     <div class="field">
       <label>Нотатка (необов'язково)</label>
@@ -927,21 +1047,40 @@ function selectExpenseCategory(id) {
   event.currentTarget.classList.add('selected');
 }
 
-function openNewCategoryForm() {
-  document.getElementById('new-cat-form').innerHTML = `
-    <div class="field" style="margin-top:10px">
-      <label>Назва категорії</label>
-      <input type="text" id="new-cat-name" placeholder="Наприклад: Подарунки">
-    </div>
-    <div class="field">
-      <label>Іконка</label>
-      <div class="icon-picker" id="new-cat-icons">
-        ${CATEGORY_ICON_CHOICES.map((ic, idx) => `
-          <div class="icon-btn ${idx === 0 ? 'selected' : ''}" data-icon="${ic}" onclick="pickCatIcon(this)">${ic}</div>
-        `).join('')}
+function toggleNewCategoryForm() {
+  const box = document.getElementById('new-cat-form');
+  const chipAdd = document.getElementById('chip-add-category');
+  const isOpen = box.dataset.open === '1';
+
+  if (isOpen) {
+    box.innerHTML = '';
+    box.dataset.open = '0';
+    if (chipAdd) chipAdd.classList.remove('selected');
+    return;
+  }
+
+  if (chipAdd) chipAdd.classList.add('selected');
+  box.dataset.open = '1';
+  box.innerHTML = `
+    <div class="new-cat-box">
+      <div class="new-cat-box-head">
+        <span>🆕 Нова категорія</span>
+        <button type="button" class="new-cat-box-close" onclick="toggleNewCategoryForm()" aria-label="Закрити">✕</button>
       </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Назва нової категорії</label>
+        <input type="text" id="new-cat-name" placeholder="Наприклад: Подарунки" autofocus>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Іконка для нової категорії</label>
+        <div class="icon-picker" id="new-cat-icons">
+          ${CATEGORY_ICON_CHOICES.map((ic, idx) => `
+            <div class="icon-btn ${idx === 0 ? 'selected' : ''}" data-icon="${ic}" onclick="pickCatIcon(this)">${ic}</div>
+          `).join('')}
+        </div>
+      </div>
+      <button class="btn-secondary" onclick="saveNewCategory()">Зберегти категорію</button>
     </div>
-    <button class="btn-secondary" onclick="saveNewCategory()">Зберегти категорію</button>
   `;
 }
 
@@ -966,6 +1105,7 @@ async function submitExpense() {
   const amount = Number(document.getElementById('exp-amount').value);
   if (!amount || amount <= 0) { alert('Введи суму більше нуля'); return; }
   if (!state.pendingCategoryId) { alert('Обери категорію'); return; }
+  if (amount > state.profile.balance) { alert('Недостатньо коштів на балансі для цієї витрати'); return; }
   const note = document.getElementById('exp-note').value.trim();
   const date = isoToYMD(document.getElementById('exp-date').value || todayISO());
 
@@ -980,7 +1120,50 @@ async function submitExpense() {
 
 /* -------------------------------- Статистика -------------------------------- */
 
+function statsModeToggleHtml() {
+  return `
+    <div class="chip-row" style="margin-bottom:14px">
+      <div class="chip ${state.statsMode !== 'range' ? 'selected' : ''}" onclick="setStatsMode('month')">📅 Місяць</div>
+      <div class="chip ${state.statsMode === 'range' ? 'selected' : ''}" onclick="setStatsMode('range')">🗂 Період</div>
+    </div>
+  `;
+}
+
+function setStatsMode(mode) {
+  if (state.statsMode === mode) return;
+  state.statsMode = mode;
+  renderApp();
+}
+
+function catBreakdownHtml(byCat, emptyText) {
+  const maxCat = Math.max(1, ...Object.values(byCat));
+  const rows = Object.entries(byCat)
+    .sort((a, b) => b[1] - a[1])
+    .map(([catId, sum], i) => {
+      const cat = state.categories.find(c => c.id === catId) || { name: 'Інше', icon: '📦' };
+      const pct = Math.round((sum / maxCat) * 100);
+      return `
+        <div class="cat-bar-row" style="--i:${i}">
+          <div class="cat-bar-top">
+            <span class="cat-name">${cat.icon} ${escapeHtml(cat.name)}</span>
+            <span class="cat-amount">${fmtMoney(sum)}</span>
+          </div>
+          <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      `;
+    }).join('');
+  return rows || `<div class="empty-state">${emptyText}</div>`;
+}
+
 async function renderStats() {
+  if (state.statsMode === 'range') {
+    await renderStatsRange();
+  } else {
+    await renderStatsMonth();
+  }
+}
+
+async function renderStatsMonth() {
   const year = state.statsYear, month = state.statsMonth;
   const mk = monthKeyFromYM(year, month);
   await ensureMonthLoaded(mk);
@@ -1018,25 +1201,9 @@ async function renderStats() {
     `;
   }
 
-  const maxCat = Math.max(1, ...Object.values(byCat));
-  const catRows = Object.entries(byCat)
-    .sort((a, b) => b[1] - a[1])
-    .map(([catId, sum]) => {
-      const cat = state.categories.find(c => c.id === catId) || { name: 'Інше', icon: '📦' };
-      const pct = Math.round((sum / maxCat) * 100);
-      return `
-        <div class="cat-bar-row">
-          <div class="cat-bar-top">
-            <span class="cat-name">${cat.icon} ${escapeHtml(cat.name)}</span>
-            <span class="cat-amount">${fmtMoney(sum)}</span>
-          </div>
-          <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
-        </div>
-      `;
-    }).join('');
-
   document.getElementById('page').innerHTML = `
-    <div class="topbar"><div class="topbar-brand"><span>Статистика</span></div></div>
+    ${topbarHtml('<span>Статистика</span>', false)}
+    ${statsModeToggleHtml()}
 
     <div class="month-nav">
       <button onclick="shiftMonth(-1)">‹</button>
@@ -1063,7 +1230,7 @@ async function renderStats() {
     </div>
 
     <div class="section-title">Витрати за категоріями</div>
-    ${catRows || `<div class="empty-state">Цього місяця ще немає витрат</div>`}
+    ${catBreakdownHtml(byCat, 'Цього місяця ще немає витрат')}
   `;
 }
 
@@ -1086,23 +1253,107 @@ function openDayModal(dStr) {
   `);
 }
 
+/* ------------------------- Статистика за довільний період ------------------------- */
+
+async function computeRangeStats(fromYMD, toYMD) {
+  const monthKeys = new Set();
+  const cursor = ymdToDate(fromYMD);
+  const end = ymdToDate(toYMD);
+  while (cursor <= end) {
+    monthKeys.add(monthKeyFromYM(cursor.getFullYear(), cursor.getMonth()));
+    cursor.setMonth(cursor.getMonth() + 1, 1);
+  }
+
+  await Promise.all([...monthKeys].map(ensureMonthLoaded));
+
+  let totalExp = 0, totalInc = 0;
+  const byCat = {};
+  monthKeys.forEach(mk => {
+    (state.txCache[mk] || []).forEach(tx => {
+      if (tx.d < fromYMD || tx.d > toYMD) return;
+      if (tx.t === 'e') {
+        totalExp += tx.a;
+        byCat[tx.c] = (byCat[tx.c] || 0) + tx.a;
+      } else {
+        totalInc += tx.a;
+      }
+    });
+  });
+
+  return { totalExp, totalInc, byCat };
+}
+
+async function renderStatsRange() {
+  if (!state.statsRangeFrom || !state.statsRangeTo) {
+    const d = new Date();
+    state.statsRangeFrom = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    state.statsRangeTo = todayISO();
+  }
+
+  const fromYMD = isoToYMD(state.statsRangeFrom);
+  const toYMD = isoToYMD(state.statsRangeTo);
+  const { totalExp, totalInc, byCat } = await computeRangeStats(fromYMD, toYMD);
+
+  document.getElementById('page').innerHTML = `
+    ${topbarHtml('<span>Статистика</span>', false)}
+    ${statsModeToggleHtml()}
+
+    <div class="cal-card">
+      <div class="subgrid">
+        <div class="field" style="margin-bottom:0">
+          <label>Від</label>
+          <input type="date" id="range-from" value="${state.statsRangeFrom}" max="${todayISO()}" onchange="applyStatsRange()">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>До</label>
+          <input type="date" id="range-to" value="${state.statsRangeTo}" max="${todayISO()}" onchange="applyStatsRange()">
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-summary">
+      <div class="stat-box">
+        <div class="stat-label">Витрачено</div>
+        <div class="stat-value" style="color:var(--red)">−${fmtMoney(totalExp)}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Поповнено</div>
+        <div class="stat-value" style="color:var(--green)">+${fmtMoney(totalInc)}</div>
+      </div>
+    </div>
+
+    <div class="section-title">Витрати за категоріями</div>
+    ${catBreakdownHtml(byCat, 'За обраний період витрат немає')}
+  `;
+}
+
+async function applyStatsRange() {
+  const from = document.getElementById('range-from').value;
+  const to = document.getElementById('range-to').value;
+  if (!from || !to) return;
+  if (from > to) { alert('Дата «Від» не може бути пізніше за дату «До»'); return; }
+  state.statsRangeFrom = from;
+  state.statsRangeTo = to;
+  renderApp();
+}
+
 /* --------------------------------- Баночки --------------------------------- */
 
 function renderJars() {
   document.getElementById('page').innerHTML = `
-    <div class="topbar"><div class="topbar-brand"><span>Баночки</span></div></div>
+    ${topbarHtml('<span>Баночки</span>', false)}
 
     <button class="fab" onclick="openNewJarModal()">🫙 + Нова баночка</button>
 
-    ${state.jars.length ? state.jars.map(jarCardHtml).join('') : `<div class="empty-state">Ще немає жодної баночки — створи першу, щоб почати відкладати на щось конкретне</div>`}
+    ${state.jars.length ? state.jars.map((jar, i) => jarCardHtml(jar, i)).join('') : `<div class="empty-state">Ще немає жодної баночки — створи першу, щоб почати відкладати на щось конкретне</div>`}
   `;
 }
 
-function jarCardHtml(jar) {
+function jarCardHtml(jar, i) {
   const pct = jar.goal > 0 ? Math.min(100, Math.round((jar.saved / jar.goal) * 100)) : null;
   const autoLabel = jar.auto ? `🔁 +${fmtMoney(jar.auto.amount)} кожні ${jar.auto.everyDays === 1 ? 'день' : jar.auto.everyDays + ' дн.'}` : '';
   return `
-    <div class="jar-card" onclick="openJarDetail('${jar.id}')">
+    <div class="jar-card" style="--i:${i || 0}" onclick="openJarDetail('${jar.id}')">
       <div class="jar-top">
         <div class="jar-emoji">${jar.icon}</div>
         <div>
@@ -1329,6 +1580,46 @@ async function applyAutoSaves() {
   if (changed) {
     await Promise.all([saveProfile(), saveJars()]);
   }
+}
+
+/* -------------------------------- Налаштування -------------------------------- */
+
+function openSettingsModal() {
+  showModal(`
+    <div class="sheet-title">Налаштування</div>
+    <div class="field">
+      <label>Дані гаманця</label>
+      <div class="tx-note" style="white-space:normal">Баланс, категорії, баночки та історія операцій зберігаються у хмарі Telegram і прив'язані до твого акаунту.</div>
+    </div>
+    <div class="section-title">Небезпечна зона</div>
+    <button class="btn-danger" onclick="confirmResetWallet()">🗑 Скинути гаманець і почати заново</button>
+  `);
+}
+
+async function confirmResetWallet() {
+  const sure = confirm('Це видалить баланс, усі категорії, баночки та повну історію операцій. Дію неможливо скасувати. Продовжити?');
+  if (!sure) return;
+  await resetWallet();
+}
+
+async function resetWallet() {
+  const monthKeys = (state.profile && state.profile.txMonths) ? state.profile.txMonths : [];
+  const keysToRemove = ['profile', 'categories', 'jars', ...monthKeys];
+  await Promise.all(keysToRemove.map(k => csRemoveItem(k).catch(() => {})));
+
+  state.profile = null;
+  state.categories = [];
+  state.jars = [];
+  state.txCache = {};
+  state.autoNotices = [];
+  state.tab = 'home';
+  state.statsMode = 'month';
+  state.statsRangeFrom = null;
+  state.statsRangeTo = null;
+
+  closeModal();
+  document.getElementById('tabbar').style.display = 'none';
+  renderOnboarding();
 }
 
 /* --------------------------------- Модалки --------------------------------- */
