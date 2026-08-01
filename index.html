@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Гаманець</title>
+
+<!-- SDK від Telegram: дає доступ до даних користувача, теми, кнопок -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+  :root {
+    /* Кольори підтягуємо з теми Telegram (світла/темна тема користувача),
+       а якщо відкрито поза Telegram — використовуємо запасні значення */
+    --bg: var(--tg-theme-bg-color, #F4F6F5);
+    --bg-secondary: var(--tg-theme-secondary-bg-color, #FFFFFF);
+    --text: var(--tg-theme-text-color, #1A2E28);
+    --hint: var(--tg-theme-hint-color, #7C8B85);
+    --button: var(--tg-theme-button-color, #0F6E56);
+    --button-text: var(--tg-theme-button-text-color, #FFFFFF);
+
+    --jar: #0F6E56;
+    --coin: #F2A623;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px 16px 40px;
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 0 8px;
+  }
+
+  .jar {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 14px;
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 12px;
+    border: 2px solid var(--bg-secondary);
+  }
+
+  .greeting {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--hint);
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 20px;
+  }
+
+  .balance-label {
+    font-size: 13px;
+    color: var(--hint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .balance-value {
+    font-size: 32px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+  }
+
+  .balance-hint {
+    font-size: 13px;
+    color: var(--hint);
+    margin-top: 8px;
+  }
+
+  .roadmap {
+    margin-top: 20px;
+  }
+
+  .roadmap-title {
+    font-size: 13px;
+    color: var(--hint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  .feature-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+  }
+
+  .feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(15, 110, 86, 0.1);
+    color: var(--jar);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .feature-text {
+    flex: 1;
+  }
+
+  .feature-name {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .feature-status {
+    font-size: 12px;
+    color: var(--hint);
+    margin-top: 1px;
+  }
+
+  .fallback {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .fallback p {
+    color: var(--hint);
+    font-size: 14px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+  const tg = window.Telegram ? window.Telegram.WebApp : null;
+  const app = document.getElementById('app');
+
+  // Проста SVG-баночка — візуальна "фішка" застосунку
+  const jarSvg = `
+    <svg class="jar" viewBox="0 0 72 72" fill="none">
+      <rect x="16" y="10" width="40" height="10" rx="4" fill="var(--jar)" opacity="0.35"/>
+      <path d="M14 24 C14 20 17 18 20 18 H52 C55 18 58 20 58 24 V56 C58 61 54 65 49 65 H23 C18 65 14 61 14 56 Z"
+            fill="var(--bg-secondary)" stroke="var(--jar)" stroke-width="2.5"/>
+      <circle cx="36" cy="40" r="7" fill="var(--coin)"/>
+      <circle cx="24" cy="52" r="5" fill="var(--coin)" opacity="0.6"/>
+    </svg>
+  `;
+
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    // Застосунок відкрито всередині Telegram — є дані користувача
+    tg.ready();
+    tg.expand();
+
+    const user = tg.initDataUnsafe.user;
+    const name = user.first_name || 'друже';
+    const photo = user.photo_url;
+
+    app.innerHTML = `
+      <div class="hero">
+        ${photo ? `<img class="avatar" src="${photo}" alt="">` : jarSvg}
+        <div class="greeting">Привіт, ${name}!</div>
+        <div class="subtitle">Це твій гаманець</div>
+      </div>
+
+      <div class="card">
+        <div class="balance-label">Загальний баланс</div>
+        <div class="balance-value">— грн</div>
+        <div class="balance-hint">Поки що тут порожньо — далі додамо можливість вписати суму</div>
+      </div>
+
+      <div class="roadmap">
+        <div class="roadmap-title">Що буде далі</div>
+
+        <div class="feature-row">
+          <div class="feature-icon">₴</div>
+          <div class="feature-text">
+            <div class="feature-name">Категорії витрат</div>
+            <div class="feature-status">скоро</div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-icon">📅</div>
+          <div class="feature-text">
+            <div class="feature-name">Календар і статистика</div>
+            <div class="feature-status">скоро</div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-icon">🫙</div>
+          <div class="feature-text">
+            <div class="feature-name">Баночки для накопичень</div>
+            <div class="feature-status">скоро</div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    // Сторінку відкрито у звичайному браузері, не через Telegram
+    app.innerHTML = `
+      <div class="fallback">
+        ${jarSvg}
+        <div class="greeting">Гаманець</div>
+        <p>Ця сторінка працює лише всередині Telegram.<br>Відкрий її через кнопку в боті.</p>
+      </div>
+    `;
+  }
+</script>
+
+</body>
+</html>
