@@ -181,10 +181,48 @@
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
   }
+
+  .balance-actions button:active { transform: scale(0.96); }
 
   .btn-topup { background: rgba(30, 158, 99, 0.12); color: var(--green); }
   .btn-expense { background: rgba(214, 69, 69, 0.1); color: var(--red); }
+
+  /* ---------- Картка балансу (акцентна, градієнтна) ---------- */
+  .greeting {
+    font-family: 'Manrope', sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .balance-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--jar) 0%, var(--jar-light) 100%);
+    box-shadow: 0 4px 10px rgba(15, 110, 86, 0.18), 0 14px 30px rgba(15, 110, 86, 0.16);
+    border: none;
+  }
+
+  .balance-card::before,
+  .balance-card::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.09);
+    pointer-events: none;
+  }
+  .balance-card::before { width: 150px; height: 150px; top: -60px; right: -50px; }
+  .balance-card::after { width: 110px; height: 110px; bottom: -55px; left: -25px; background: rgba(255, 255, 255, 0.06); }
+
+  .balance-card .balance-label { color: rgba(255, 255, 255, 0.78); position: relative; z-index: 1; }
+  .balance-card .balance-value { color: #fff; position: relative; z-index: 1; }
+  .balance-card .balance-actions { position: relative; z-index: 1; }
+  .balance-card .btn-topup { background: rgba(255, 255, 255, 0.18); color: #fff; }
+  .balance-card .btn-expense { background: rgba(255, 255, 255, 0.12); color: #fff; }
+  .balance-card .btn-topup:hover, .balance-card .btn-expense:hover { background: rgba(255, 255, 255, 0.24); }
 
   .section-title {
     font-size: 12px;
@@ -226,6 +264,26 @@
   .tx-amount { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 14px; flex-shrink: 0; }
   .tx-amount.pos { color: var(--green); }
   .tx-amount.neg { color: var(--red); }
+
+  .tx-row { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+  .tx-row:active { transform: scale(0.98); }
+
+  .tx-delete-btn {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--hint);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tx-delete-btn:hover, .tx-delete-btn:active { background: rgba(214, 69, 69, 0.12); color: var(--red); }
 
   .empty-state {
     text-align: center;
@@ -429,9 +487,18 @@
     margin-top: 4px;
   }
 
-  .btn-primary { background: var(--jar); color: #fff; }
+  .btn-primary { background: var(--jar); color: #fff; box-shadow: 0 4px 12px rgba(15,110,86,0.28); }
   .btn-secondary { background: rgba(15,110,86,0.1); color: var(--jar); }
   .btn-danger { background: rgba(214,69,69,0.1); color: var(--red); }
+
+  .btn-primary, .btn-secondary, .btn-danger, .fab, .icon-btn-ghost, .chip, .month-nav button {
+    transition: transform 0.12s ease, opacity 0.12s ease, background 0.15s ease;
+  }
+  .btn-primary:active, .btn-secondary:active, .btn-danger:active, .fab:active, .chip:active { transform: scale(0.97); }
+  .icon-btn-ghost:hover, .month-nav button:hover { background: rgba(15,110,86,0.08); }
+
+  .jar-card { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+  .jar-card:active { transform: scale(0.98); }
 
   .toggle-row {
     display: flex;
@@ -900,7 +967,7 @@ function topbarHtml(brandHtml, showAvatar) {
 
 async function renderHome() {
   const user = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
-  const name = (user && user.first_name) || 'друже';
+  const name = (user && (user.first_name || user.username)) || 'друже';
 
   const mk = monthKeyFromYMD(todayYMD());
   await ensureMonthLoaded(mk);
@@ -918,9 +985,11 @@ async function renderHome() {
 
     ${noticeHtml}
 
-    <div class="card">
-      <div class="balance-label">Баланс — привіт, ${escapeHtml(name)}</div>
-      <div class="balance-value">${fmtMoney(state.profile.balance)}</div>
+    <div class="greeting">Привіт, ${escapeHtml(name)} 👋</div>
+
+    <div class="card balance-card">
+      <div class="balance-label">Баланс</div>
+      <div class="balance-value" id="balance-value">${fmtMoney(0)}</div>
       <div class="balance-actions">
         <button class="btn-topup" onclick="openTopupModal()">＋ Поповнити</button>
         <button class="btn-expense" onclick="openExpenseModal()">－ Витрата</button>
@@ -932,6 +1001,36 @@ async function renderHome() {
       ${recent.length ? recent.map((tx, i) => txRowHtml(tx, i)).join('') : `<div class="empty-state">Поки що немає операцій цього місяця</div>`}
     </div>
   `;
+
+  animateBalanceCounter(state.profile.balance);
+}
+
+/* Анімований лічильник балансу: пробігає від 0 до фактичної суми при
+   кожному відкритті головної сторінки. */
+function animateBalanceCounter(target) {
+  const el = document.getElementById('balance-value');
+  if (!el) return;
+
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion || target === 0) {
+    el.textContent = fmtMoney(target);
+    return;
+  }
+
+  const duration = 900;
+  const start = performance.now();
+
+  function tick(now) {
+    const progress = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    el.textContent = fmtMoney(target * eased);
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      el.textContent = fmtMoney(target);
+    }
+  }
+  requestAnimationFrame(tick);
 }
 
 function dismissNotices() {
@@ -942,6 +1041,7 @@ function dismissNotices() {
 
 function txRowHtml(tx, i) {
   const style = i != null ? ` style="--i:${i}"` : '';
+  const delBtn = `<button class="tx-delete-btn" onclick="event.stopPropagation(); deleteTransaction('${tx.i}','${tx.d}')" aria-label="Видалити">✕</button>`;
   if (tx.t === 'i') {
     return `
       <div class="tx-row"${style}>
@@ -951,6 +1051,7 @@ function txRowHtml(tx, i) {
           ${tx.n ? `<div class="tx-note">${escapeHtml(tx.n)}</div>` : ''}
         </div>
         <div class="tx-amount pos">+${fmtMoney(tx.a)}</div>
+        ${delBtn}
       </div>
     `;
   }
@@ -963,8 +1064,40 @@ function txRowHtml(tx, i) {
         ${tx.n ? `<div class="tx-note">${escapeHtml(tx.n)}</div>` : `<div class="tx-note">${fmtDateShort(tx.d)}</div>`}
       </div>
       <div class="tx-amount neg">−${fmtMoney(tx.a)}</div>
+      ${delBtn}
     </div>
   `;
+}
+
+/* Видалення операції. Для поповнення обов'язково перевіряємо, що після
+   видалення баланс не піде в мінус (наприклад: поповнили 400, витратили 200,
+   баланс 200 — видалити поповнення 400 не можна, бо стане -200). */
+async function deleteTransaction(txId, txDate) {
+  const mk = monthKeyFromYMD(txDate);
+  await ensureMonthLoaded(mk);
+  const list = state.txCache[mk];
+  const idx = list.findIndex(t => t.i === txId);
+  if (idx === -1) return;
+  const tx = list[idx];
+
+  if (tx.t === 'i' && state.profile.balance - tx.a < -0.001) {
+    alert('Неможливо видалити це поповнення — баланс став би відʼємним. Спочатку видали або зменш витрати, зроблені за ці кошти.');
+    return;
+  }
+
+  const sure = confirm(tx.t === 'i' ? 'Видалити це поповнення?' : 'Видалити цю витрату?');
+  if (!sure) return;
+
+  list.splice(idx, 1);
+  await saveMonth(mk);
+
+  if (tx.t === 'i') state.profile.balance -= tx.a;
+  else state.profile.balance += tx.a;
+  await saveProfile();
+
+  haptic('light');
+  closeModal();
+  renderApp();
 }
 
 /* ---------------------------- Модалка: поповнення ---------------------------- */
@@ -1045,6 +1178,14 @@ function selectExpenseCategory(id) {
   state.pendingCategoryId = id;
   document.getElementById('exp-cat-chips').querySelectorAll('.chip').forEach(el => el.classList.remove('selected'));
   event.currentTarget.classList.add('selected');
+
+  // якщо форма створення нової категорії була відкрита — ховаємо її,
+  // бо користувач передумав і обрав вже існуючу категорію
+  const box = document.getElementById('new-cat-form');
+  if (box && box.dataset.open === '1') {
+    box.innerHTML = '';
+    box.dataset.open = '0';
+  }
 }
 
 function toggleNewCategoryForm() {
@@ -1056,9 +1197,16 @@ function toggleNewCategoryForm() {
     box.innerHTML = '';
     box.dataset.open = '0';
     if (chipAdd) chipAdd.classList.remove('selected');
+    // повертаємо обведення на раніше обрану категорію, якщо вона є
+    const prevChip = [...document.getElementById('exp-cat-chips').querySelectorAll('.chip')]
+      .find(el => el !== chipAdd && el.getAttribute('onclick') === `selectExpenseCategory('${state.pendingCategoryId}')`);
+    if (prevChip) prevChip.classList.add('selected');
     return;
   }
 
+  // відкриваємо форму нової категорії — знімаємо виділення з усіх звичайних категорій,
+  // щоб не залишалось подвійного обведення
+  document.getElementById('exp-cat-chips').querySelectorAll('.chip').forEach(el => el.classList.remove('selected'));
   if (chipAdd) chipAdd.classList.add('selected');
   box.dataset.open = '1';
   box.innerHTML = `
