@@ -385,8 +385,8 @@
   #page > *:nth-child(6) { animation-delay: 200ms; }
   #page > *:nth-child(n+7) { animation-delay: 220ms; }
 
-  /* Списки (операції, баночки, категорії) каскадом всередині свого контейнера */
-  .tx-row, .jar-card, .cat-bar-row {
+  /* Списки (операції, баночки, категорії, бюджети) каскадом всередині свого контейнера */
+  .tx-row, .jar-card, .cat-bar-row, .budget-card {
     animation: fadeSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
     animation-delay: calc(var(--i, 0) * 45ms);
   }
@@ -553,6 +553,8 @@
     color: var(--text);
   }
   .month-nav .month-label { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 16px; }
+  .month-nav button:disabled { opacity: 0.35; cursor: default; }
+  .month-nav button:disabled:hover { background: var(--bg-secondary); }
 
   .cal-card { background: var(--bg-secondary); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); border: 1px solid var(--card-border); }
 
@@ -596,6 +598,71 @@
   .cat-bar-top .cat-amount { color: var(--hint); font-variant-numeric: tabular-nums; }
   .cat-bar-track { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
   .cat-bar-fill { height: 100%; background: var(--jar); border-radius: 4px; }
+
+  .month-nav button:disabled { opacity: 0.35; cursor: default; }
+
+  /* ---------- Бюджети ---------- */
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 22px 0 10px 2px;
+  }
+  .section-title-row .section-title { margin: 0; }
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--jar);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 2px;
+  }
+
+  .budget-row { margin-bottom: 14px; }
+  .budget-row:last-child { margin-bottom: 0; }
+  .budget-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; gap: 8px; }
+  .budget-top .budget-name { font-weight: 600; }
+  .budget-top .budget-amount { color: var(--hint); font-variant-numeric: tabular-nums; font-size: 12px; white-space: nowrap; }
+  .budget-sub { font-size: 11px; color: var(--hint); margin-top: 4px; }
+
+  .budget-fill-ok { background: var(--jar); }
+  .budget-fill-near { background: var(--coin); }
+  .budget-fill-over { background: var(--red); }
+
+  .budget-cat-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .budget-cat-row:last-child { border-bottom: none; }
+  .budget-cat-icon { font-size: 18px; width: 26px; text-align: center; flex-shrink: 0; }
+  .budget-cat-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .budget-cat-inputs { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .budget-cat-inputs input[type="number"] {
+    width: 76px;
+    padding: 8px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .budget-cat-inputs select {
+    padding: 8px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
+    font-size: 12px;
+    font-family: inherit;
+  }
+
+  /* ---------- Графік балансу ---------- */
+  .chart-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--hint);
+    margin-top: 8px;
+  }
 
   /* ---------- Баночки ---------- */
   .jar-card {
@@ -641,6 +708,71 @@
     font-size: 14px;
     margin-bottom: 16px;
     cursor: pointer;
+  }
+
+  /* ---------- Бюджети ---------- */
+  .section-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 22px 0 10px 2px;
+  }
+  .section-title-row .section-title { margin: 0; }
+
+  .budget-edit-link {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--jar);
+    text-transform: none;
+    letter-spacing: normal;
+    cursor: pointer;
+  }
+
+  .budget-card {
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--card-border);
+  }
+  .budget-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .budget-cat { font-weight: 600; flex-shrink: 0; }
+  .budget-figures { font-variant-numeric: tabular-nums; text-align: right; font-size: 12px; }
+
+  .budget-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .budget-row .field { flex: 1; margin-bottom: 0; }
+  .budget-period-select {
+    width: 108px;
+    padding: 12px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  /* ---------- Графік балансу ---------- */
+  .balance-chart-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--hint);
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ---------- Онбординг ---------- */
@@ -792,6 +924,26 @@ function daysBetween(fromYMD, toYMD) {
   return Math.round((b - a) / 86400000);
 }
 
+function dateToYMD(d) {
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/* Межі періоду (тиждень Пн-Нд або календарний місяць), що містить дату dateYMD */
+function getPeriodBounds(dateYMD, period) {
+  const d = ymdToDate(dateYMD);
+  if (period === 'week') {
+    const dow = (d.getDay() + 6) % 7; // Пн = 0
+    const monday = new Date(d); monday.setDate(d.getDate() - dow);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    return { from: dateToYMD(monday), to: dateToYMD(sunday) };
+  }
+  const y = d.getFullYear(), m = d.getMonth();
+  const from = `${y}${String(m + 1).padStart(2, '0')}01`;
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  const to = `${y}${String(m + 1).padStart(2, '0')}${String(lastDay).padStart(2, '0')}`;
+  return { from, to };
+}
+
 function monthKeyFromYMD(ymd) {
   return `tx_${ymd.slice(0, 4)}_${ymd.slice(4, 6)}`;
 }
@@ -806,6 +958,31 @@ function escapeHtml(str) {
 
 function haptic(style) {
   if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style || 'light');
+}
+
+/* Telegram Desktop (і деякі інші клієнти) НЕ підтримують нативні window.alert /
+   window.confirm / window.prompt всередині Mini App WebView — вони просто мовчки
+   нічого не показують. Тому скрізь використовуємо tg.showAlert / tg.showConfirm,
+   коли доступні, і відкатуємось на нативні лише поза Telegram (для тестів у браузері). */
+function tgAlert(message) {
+  return new Promise(resolve => {
+    if (tg && tg.showAlert) {
+      tg.showAlert(message, () => resolve());
+    } else {
+      window.alert(message);
+      resolve();
+    }
+  });
+}
+
+function tgConfirm(message) {
+  return new Promise(resolve => {
+    if (tg && tg.showConfirm) {
+      tg.showConfirm(message, (ok) => resolve(!!ok));
+    } else {
+      resolve(window.confirm(message));
+    }
+  });
 }
 
 /* Позначаємо <html data-theme="dark|light"> — на це реагують CSS-змінні
@@ -972,6 +1149,7 @@ async function renderHome() {
   const mk = monthKeyFromYMD(todayYMD());
   await ensureMonthLoaded(mk);
   const recent = state.txCache[mk].slice(-5).reverse();
+  const budgetsHtml = await budgetsHomeHtml();
 
   const noticeHtml = state.autoNotices.length ? `
     <div class="notice-banner">
@@ -995,6 +1173,8 @@ async function renderHome() {
         <button class="btn-expense" onclick="openExpenseModal()">－ Витрата</button>
       </div>
     </div>
+
+    ${budgetsHtml}
 
     <div class="section-title">Останні операції цього місяця</div>
     <div id="recent-list">
@@ -1081,11 +1261,11 @@ async function deleteTransaction(txId, txDate) {
   const tx = list[idx];
 
   if (tx.t === 'i' && state.profile.balance - tx.a < -0.001) {
-    alert('Неможливо видалити це поповнення — баланс став би відʼємним. Спочатку видали або зменш витрати, зроблені за ці кошти.');
+    await tgAlert('Неможливо видалити це поповнення — баланс став би відʼємним. Спочатку видали або зменш витрати, зроблені за ці кошти.');
     return;
   }
 
-  const sure = confirm(tx.t === 'i' ? 'Видалити це поповнення?' : 'Видалити цю витрату?');
+  const sure = await tgConfirm(tx.t === 'i' ? 'Видалити це поповнення?' : 'Видалити цю витрату?');
   if (!sure) return;
 
   list.splice(idx, 1);
@@ -1123,9 +1303,11 @@ function openTopupModal() {
 
 async function submitTopup() {
   const amount = Number(document.getElementById('topup-amount').value);
-  if (!amount || amount <= 0) { alert('Введи суму більше нуля'); return; }
+  if (!amount || amount <= 0) { await tgAlert('Введи суму більше нуля'); return; }
+  const rawDate = document.getElementById('topup-date').value || todayISO();
+  if (rawDate > todayISO()) { await tgAlert('Дата не може бути в майбутньому'); return; }
   const note = document.getElementById('topup-note').value.trim();
-  const date = isoToYMD(document.getElementById('topup-date').value || todayISO());
+  const date = isoToYMD(rawDate);
 
   await addTransaction({ i: uid(), t: 'i', a: amount, n: note, d: date });
   state.profile.balance += amount;
@@ -1239,7 +1421,7 @@ function pickCatIcon(el) {
 
 async function saveNewCategory() {
   const name = document.getElementById('new-cat-name').value.trim();
-  if (!name) { alert('Введи назву категорії'); return; }
+  if (!name) { await tgAlert('Введи назву категорії'); return; }
   const iconEl = document.querySelector('#new-cat-icons .icon-btn.selected');
   const icon = iconEl ? iconEl.dataset.icon : '📦';
   const newCat = { id: uid(), name, icon };
@@ -1251,11 +1433,29 @@ async function saveNewCategory() {
 
 async function submitExpense() {
   const amount = Number(document.getElementById('exp-amount').value);
-  if (!amount || amount <= 0) { alert('Введи суму більше нуля'); return; }
-  if (!state.pendingCategoryId) { alert('Обери категорію'); return; }
-  if (amount > state.profile.balance) { alert('Недостатньо коштів на балансі для цієї витрати'); return; }
+  if (!amount || amount <= 0) { await tgAlert('Введи суму більше нуля'); return; }
+  if (!state.pendingCategoryId) { await tgAlert('Обери категорію'); return; }
+  if (amount > state.profile.balance) { await tgAlert('Недостатньо коштів на балансі для цієї витрати'); return; }
+  const rawDate = document.getElementById('exp-date').value || todayISO();
+  if (rawDate > todayISO()) { await tgAlert('Дата не може бути в майбутньому'); return; }
   const note = document.getElementById('exp-note').value.trim();
-  const date = isoToYMD(document.getElementById('exp-date').value || todayISO());
+  const date = isoToYMD(rawDate);
+
+  const cat = state.categories.find(c => c.id === state.pendingCategoryId);
+  if (cat && cat.budget && cat.budget.limit > 0) {
+    const { from, to } = getPeriodBounds(date, cat.budget.period);
+    const spentSoFar = await categorySpendInRange(cat.id, from, to);
+    const projected = spentSoFar + amount;
+    if (projected > cat.budget.limit) {
+      const periodLabel = cat.budget.period === 'week' ? 'тиждень' : 'місяць';
+      const proceed = await tgConfirm(
+        `Ви виходите за бюджет категорії «${cat.name}» на цей ${periodLabel} ` +
+        `(ліміт ${fmtMoney(cat.budget.limit)}, буде витрачено ${fmtMoney(projected)}). ` +
+        `Ви впевнені, що це того варто?`
+      );
+      if (!proceed) return;
+    }
+  }
 
   await addTransaction({ i: uid(), t: 'e', c: state.pendingCategoryId, a: amount, n: note, d: date });
   state.profile.balance -= amount;
@@ -1349,6 +1549,14 @@ async function renderStatsMonth() {
     `;
   }
 
+  const monthStart = `${year}${String(month + 1).padStart(2, '0')}01`;
+  const monthEndActual = `${year}${String(month + 1).padStart(2, '0')}${String(daysInMonth).padStart(2, '0')}`;
+  const chartSpanTo = monthEndActual > todayStr ? todayStr : monthEndActual;
+  const balanceSeries = await computeBalanceSeries(monthStart, chartSpanTo);
+
+  const now = new Date();
+  const atCurrentMonth = (year === now.getFullYear() && month === now.getMonth());
+
   document.getElementById('page').innerHTML = `
     ${topbarHtml('<span>Статистика</span>', false)}
     ${statsModeToggleHtml()}
@@ -1356,7 +1564,7 @@ async function renderStatsMonth() {
     <div class="month-nav">
       <button onclick="shiftMonth(-1)">‹</button>
       <div class="month-label">${MONTHS_UA[month]} ${year}</div>
-      <button onclick="shiftMonth(1)">›</button>
+      <button onclick="shiftMonth(1)" ${atCurrentMonth ? 'disabled' : ''}>›</button>
     </div>
 
     <div class="cal-card">
@@ -1364,6 +1572,11 @@ async function renderStatsMonth() {
         ${WEEKDAYS_UA.map(w => `<div class="cal-weekday">${w}</div>`).join('')}
         ${cells}
       </div>
+    </div>
+
+    <div class="section-title">Динаміка балансу</div>
+    <div class="cal-card">
+      ${balanceChartHtml(balanceSeries)}
     </div>
 
     <div class="stat-summary">
@@ -1383,9 +1596,17 @@ async function renderStatsMonth() {
 }
 
 function shiftMonth(delta) {
-  state.statsMonth += delta;
-  if (state.statsMonth < 0) { state.statsMonth = 11; state.statsYear--; }
-  if (state.statsMonth > 11) { state.statsMonth = 0; state.statsYear++; }
+  let newMonth = state.statsMonth + delta;
+  let newYear = state.statsYear;
+  if (newMonth < 0) { newMonth = 11; newYear--; }
+  if (newMonth > 11) { newMonth = 0; newYear++; }
+
+  const now = new Date();
+  const isFuture = newYear > now.getFullYear() || (newYear === now.getFullYear() && newMonth > now.getMonth());
+  if (isFuture) return; // не гортаємо календар у майбутнє — даних там немає
+
+  state.statsMonth = newMonth;
+  state.statsYear = newYear;
   renderApp();
 }
 
@@ -1402,6 +1623,206 @@ function openDayModal(dStr) {
 }
 
 /* ------------------------- Статистика за довільний період ------------------------- */
+
+/* ------------------------------- Бюджети ------------------------------- */
+
+async function categorySpendInRange(catId, fromYMD, toYMD) {
+  const monthKeys = new Set();
+  const cursor = ymdToDate(fromYMD);
+  const end = ymdToDate(toYMD);
+  while (cursor <= end) {
+    monthKeys.add(monthKeyFromYM(cursor.getFullYear(), cursor.getMonth()));
+    cursor.setMonth(cursor.getMonth() + 1, 1);
+  }
+  await Promise.all([...monthKeys].map(ensureMonthLoaded));
+
+  let sum = 0;
+  monthKeys.forEach(mk => {
+    (state.txCache[mk] || []).forEach(tx => {
+      if (tx.t !== 'e' || tx.c !== catId) return;
+      if (tx.d < fromYMD || tx.d > toYMD) return;
+      sum += tx.a;
+    });
+  });
+  return sum;
+}
+
+function openBudgetsModal() {
+  showModal(`
+    <div class="sheet-title">Бюджети по категоріях</div>
+    <div class="tx-note" style="margin-bottom:14px;white-space:normal">Задай ліміт витрат для категорій, які хочеш тримати під контролем — на тиждень або на місяць. Порожнє поле — без ліміту.</div>
+    <div id="budget-rows">
+      ${state.categories.map(c => budgetRowHtml(c)).join('')}
+    </div>
+    <button class="btn-primary" onclick="saveBudgets()">Зберегти</button>
+  `);
+}
+
+function budgetRowHtml(c) {
+  const limit = c.budget && c.budget.limit ? c.budget.limit : '';
+  const period = c.budget && c.budget.period === 'week' ? 'week' : 'month';
+  return `
+    <div class="budget-row">
+      <div class="field">
+        <label>${c.icon} ${escapeHtml(c.name)}</label>
+        <input type="number" inputmode="decimal" min="0" placeholder="без ліміту" class="budget-limit-input" data-cat-id="${c.id}" value="${limit}">
+      </div>
+      <select class="budget-period-select" data-cat-id="${c.id}">
+        <option value="month" ${period === 'month' ? 'selected' : ''}>Місяць</option>
+        <option value="week" ${period === 'week' ? 'selected' : ''}>Тиждень</option>
+      </select>
+    </div>
+  `;
+}
+
+async function saveBudgets() {
+  document.querySelectorAll('.budget-limit-input').forEach(input => {
+    const catId = input.dataset.catId;
+    const cat = state.categories.find(c => c.id === catId);
+    if (!cat) return;
+    const val = Number(input.value) || 0;
+    const periodSel = document.querySelector(`.budget-period-select[data-cat-id="${catId}"]`);
+    const period = periodSel && periodSel.value === 'week' ? 'week' : 'month';
+    if (val > 0) cat.budget = { limit: val, period };
+    else delete cat.budget;
+  });
+  await saveCategories();
+  closeModal();
+  haptic('medium');
+  renderApp();
+}
+
+async function budgetsHomeHtml() {
+  const budgeted = state.categories.filter(c => c.budget && c.budget.limit > 0);
+
+  if (!budgeted.length) {
+    return `
+      <div class="section-title-row">
+        <span class="section-title">Бюджети</span>
+      </div>
+      <button class="fab" onclick="openBudgetsModal()">🎯 + Задати бюджет по категоріях</button>
+    `;
+  }
+
+  const today = todayYMD();
+  const rows = await Promise.all(budgeted.map(async (c, i) => {
+    const { from, to } = getPeriodBounds(today, c.budget.period);
+    const spent = await categorySpendInRange(c.id, from, to);
+    const pct = Math.min(100, Math.round((spent / c.budget.limit) * 100));
+    const over = spent > c.budget.limit;
+    const near = !over && pct >= 80;
+    const barColor = over ? 'var(--red)' : near ? 'var(--coin)' : 'var(--jar)';
+    const figuresColor = over ? 'var(--red)' : 'var(--hint)';
+    const periodLabel = c.budget.period === 'week' ? 'на тиждень' : 'на місяць';
+    return `
+      <div class="budget-card" style="--i:${i}">
+        <div class="budget-card-top">
+          <span class="budget-cat">${c.icon} ${escapeHtml(c.name)}</span>
+          <span class="budget-figures" style="color:${figuresColor}">${fmtMoney(spent)} / ${fmtMoney(c.budget.limit)} ${periodLabel}</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div>
+    `;
+  }));
+
+  return `
+    <div class="section-title-row">
+      <span class="section-title">Бюджети</span>
+      <span class="budget-edit-link" onclick="openBudgetsModal()">⚙ Налаштувати</span>
+    </div>
+    ${rows.join('')}
+  `;
+}
+
+/* ---------------------------- Графік балансу ---------------------------- */
+
+/* Реконструює баланс на кінець кожного дня в діапазоні [spanFromYMD .. min(spanToYMD, сьогодні)].
+   Явно історія балансу не зберігається, тому рахуємо від відомого поточного балансу назад,
+   послідовно віднімаючи чисту зміну (дохід−витрата) кожного дня. */
+async function computeBalanceSeries(spanFromYMD, spanToYMD) {
+  const today = todayYMD();
+  const endYMD = spanToYMD > today ? today : spanToYMD;
+  if (spanFromYMD > endYMD) return [];
+
+  const monthKeys = new Set();
+  const cursor = ymdToDate(spanFromYMD);
+  const end = ymdToDate(today);
+  while (cursor <= end) {
+    monthKeys.add(monthKeyFromYM(cursor.getFullYear(), cursor.getMonth()));
+    cursor.setMonth(cursor.getMonth() + 1, 1);
+  }
+  await Promise.all([...monthKeys].map(ensureMonthLoaded));
+
+  const netByDay = {};
+  monthKeys.forEach(mk => {
+    (state.txCache[mk] || []).forEach(tx => {
+      if (tx.d < spanFromYMD || tx.d > today) return;
+      const delta = tx.t === 'i' ? tx.a : -tx.a;
+      netByDay[tx.d] = (netByDay[tx.d] || 0) + delta;
+    });
+  });
+
+  const dayBalances = {};
+  let running = state.profile.balance;
+  let cur = ymdToDate(today);
+  const stop = ymdToDate(spanFromYMD);
+  while (cur >= stop) {
+    const ymd = dateToYMD(cur);
+    dayBalances[ymd] = running;
+    running -= (netByDay[ymd] || 0);
+    cur.setDate(cur.getDate() - 1);
+  }
+
+  const series = [];
+  cur = ymdToDate(spanFromYMD);
+  const stopFwd = ymdToDate(endYMD);
+  while (cur <= stopFwd) {
+    const ymd = dateToYMD(cur);
+    series.push({ date: ymd, balance: dayBalances[ymd] !== undefined ? dayBalances[ymd] : running });
+    cur.setDate(cur.getDate() + 1);
+  }
+  return series;
+}
+
+function balanceChartHtml(series) {
+  if (series.length < 2) {
+    return `<div class="empty-state">Замало даних для графіка динаміки балансу</div>`;
+  }
+
+  const values = series.map(p => p.balance);
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 1);
+  const range = (max - min) || 1;
+  const W = 320, H = 120, padX = 4, padY = 10;
+  const stepX = series.length > 1 ? (W - padX * 2) / (series.length - 1) : 0;
+
+  const points = series.map((p, i) => ({
+    x: padX + i * stepX,
+    y: H - padY - ((p.balance - min) / range) * (H - padY * 2),
+  }));
+
+  const linePath = points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L${points[points.length - 1].x.toFixed(1)},${H} L${points[0].x.toFixed(1)},${H} Z`;
+
+  const first = series[0], last = series[series.length - 1];
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="140" preserveAspectRatio="none" style="display:block">
+      <defs>
+        <linearGradient id="balGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--jar)" stop-opacity="0.28"/>
+          <stop offset="100%" stop-color="var(--jar)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaPath}" fill="url(#balGrad)" stroke="none"/>
+      <path d="${linePath}" fill="none" stroke="var(--jar)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="balance-chart-labels">
+      <span>${fmtDateShort(first.date)} · ${fmtMoney(first.balance)}</span>
+      <span>${fmtDateShort(last.date)} · ${fmtMoney(last.balance)}</span>
+    </div>
+  `;
+}
 
 async function computeRangeStats(fromYMD, toYMD) {
   const monthKeys = new Set();
@@ -1441,6 +1862,7 @@ async function renderStatsRange() {
   const fromYMD = isoToYMD(state.statsRangeFrom);
   const toYMD = isoToYMD(state.statsRangeTo);
   const { totalExp, totalInc, byCat } = await computeRangeStats(fromYMD, toYMD);
+  const balanceSeries = await computeBalanceSeries(fromYMD, toYMD);
 
   document.getElementById('page').innerHTML = `
     ${topbarHtml('<span>Статистика</span>', false)}
@@ -1457,6 +1879,11 @@ async function renderStatsRange() {
           <input type="date" id="range-to" value="${state.statsRangeTo}" max="${todayISO()}" onchange="applyStatsRange()">
         </div>
       </div>
+    </div>
+
+    <div class="section-title">Динаміка балансу</div>
+    <div class="cal-card">
+      ${balanceChartHtml(balanceSeries)}
     </div>
 
     <div class="stat-summary">
@@ -1476,13 +1903,22 @@ async function renderStatsRange() {
 }
 
 async function applyStatsRange() {
-  const from = document.getElementById('range-from').value;
-  const to = document.getElementById('range-to').value;
+  let from = document.getElementById('range-from').value;
+  let to = document.getElementById('range-to').value;
   if (!from || !to) return;
-  if (from > to) { alert('Дата «Від» не може бути пізніше за дату «До»'); return; }
+
+  const today = todayISO();
+  let clamped = false;
+  if (from > today) { from = today; clamped = true; }
+  if (to > today) { to = today; clamped = true; }
+
+  if (from > to) { await tgAlert('Дата «Від» не може бути пізніше за дату «До»'); return; }
+
   state.statsRangeFrom = from;
   state.statsRangeTo = to;
   renderApp();
+
+  if (clamped) await tgAlert('Дата не може бути в майбутньому — встановлено сьогоднішню дату');
 }
 
 /* --------------------------------- Баночки --------------------------------- */
@@ -1575,7 +2011,7 @@ function toggleJarAutoFields(checked) {
 
 async function submitNewJar() {
   const name = document.getElementById('jar-name').value.trim();
-  if (!name) { alert('Введи назву баночки'); return; }
+  if (!name) { await tgAlert('Введи назву баночки'); return; }
   const iconEl = document.querySelector('#jar-icons .icon-btn.selected');
   const icon = iconEl ? iconEl.dataset.icon : '🫙';
   const goal = Number(document.getElementById('jar-goal').value) || 0;
@@ -1583,7 +2019,7 @@ async function submitNewJar() {
   let auto = null;
   if (document.getElementById('jar-auto-toggle').checked) {
     const amount = Number(document.getElementById('jar-auto-amount').value);
-    if (!amount || amount <= 0) { alert('Вкажи суму автовідкладання'); return; }
+    if (!amount || amount <= 0) { await tgAlert('Вкажи суму автовідкладання'); return; }
     const everyDays = Number(document.getElementById('jar-auto-period').value);
     auto = { amount, everyDays, lastRun: todayYMD() };
   }
@@ -1647,8 +2083,8 @@ function openJarDetail(jarId) {
 
 async function addToJar(jarId) {
   const amount = Number(document.getElementById('jar-add-amount').value);
-  if (!amount || amount <= 0) { alert('Введи суму більше нуля'); return; }
-  if (amount > state.profile.balance) { alert('Недостатньо коштів на балансі'); return; }
+  if (!amount || amount <= 0) { await tgAlert('Введи суму більше нуля'); return; }
+  if (amount > state.profile.balance) { await tgAlert('Недостатньо коштів на балансі'); return; }
 
   const jar = state.jars.find(j => j.id === jarId);
   jar.saved += amount;
@@ -1662,7 +2098,7 @@ async function addToJar(jarId) {
 
 async function enableJarAuto(jarId) {
   const amount = Number(document.getElementById('jar-auto-amount-2').value);
-  if (!amount || amount <= 0) { alert('Вкажи суму автовідкладання'); return; }
+  if (!amount || amount <= 0) { await tgAlert('Вкажи суму автовідкладання'); return; }
   const everyDays = Number(document.getElementById('jar-auto-period-2').value);
 
   const jar = state.jars.find(j => j.id === jarId);
@@ -1684,8 +2120,10 @@ async function cancelJarAuto(jarId) {
 async function deleteJar(jarId) {
   const jar = state.jars.find(j => j.id === jarId);
   if (!jar) return;
-  const refund = jar.saved > 0 ? confirm(`Видалити баночку і повернути ${fmtMoney(jar.saved)} на баланс?`) : confirm('Видалити цю баночку?');
-  if (!refund && jar.saved > 0) return;
+  const refund = jar.saved > 0
+    ? await tgConfirm(`Видалити баночку і повернути ${fmtMoney(jar.saved)} на баланс?`)
+    : await tgConfirm('Видалити цю баночку?');
+  if (!refund) return;
 
   if (jar.saved > 0) {
     state.profile.balance += jar.saved;
@@ -1745,7 +2183,7 @@ function openSettingsModal() {
 }
 
 async function confirmResetWallet() {
-  const sure = confirm('Це видалить баланс, усі категорії, баночки та повну історію операцій. Дію неможливо скасувати. Продовжити?');
+  const sure = await tgConfirm('Це видалить баланс, усі категорії, баночки та повну історію операцій. Дію неможливо скасувати. Продовжити?');
   if (!sure) return;
   await resetWallet();
 }
